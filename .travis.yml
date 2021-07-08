@@ -2,27 +2,21 @@
 
 language: python
 python:
-  - 3.8
-  - 3.7
-  - 3.6
-
-# Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
+- 3.8
+- 3.7
+- 3.6
 install: pip install -U tox-travis
-
-# Command to run tests, e.g. python setup.py test
 script: tox
-
-# Assuming you have installed the travis-ci CLI tool, after you
-# create the Github repo and add it to Travis, run the
-# following command to finish PyPI deployment setup:
-# $ travis encrypt --add deploy.password
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
   user: anascacais
   password:
     secure: PLEASE_REPLACE_ME
-  on:
+  true:
     tags: true
     repo: anascacais/epibox
     python: 3.8
+env:
+  global:
+    secure: S/eBoTMqnihOxW61roFeNDZyUoaVd+j58+mLDpwAOgVcBcaFbbBW2d2LKmXBBhEHWtyyWzHkWGR8wvokYwn68bawvqdMwhiqvQLuVKYXL1GjxVuSuyIqMigvta7TXhbNG000ZqEv3XUNDK+cbNp2xnEqCXWLnuwe570NaPAC6W6BTXCXyil6T+sEYLhgFTeOsSxQuXNHM8UV16Fn28GZV6Ahg3b4Jk6GMnjMCBE21NEEd0eFzUOueHtqan3azCrsQDjmfGpQLKoCGEO9NVZBYGEqZxk7dcMq5naYuYx8srzD5afwYcN7aBVq59EhsvgHq0arPrLQV5U6+XM4AeeO9Si2ra6tSzyislmK/sbJkwuZjShqOSKCMOn5A5lGe8ZKM3phQg+X/gS0t6kX9qFx1yXoItwmvGJ3zXwbZNjQ7+lQwXF4wu5J0j+TCpZIO4wmrTYzZMx51XVHFjoKwbUel91vGcltm1nh4NBG1z35jxMMXB3Abgjf0gooHaXjKAgVkzX1SGN/8IBCdHjV/HfdGrxZzdf6EL9M4Xic+jVShiuOgXvPZ58Tj9T05pcXsn7/JFRzpbWnyz+NXqh1Kh4oOEeabfk0RXchg64EjeQr7OpIQcr72iw5494mMwsaXOcDzU4vQ7qmjwJ8qwwRYTW7GSkekvqqRqp0bsJwQT2ORKU=
