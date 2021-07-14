@@ -76,8 +76,8 @@ class ScientISST:
     __chs = [None] * 8
     __f = None
 
-    def __init__(self, address):
-        self.address = address
+    def __init__(self, macAddress):
+        self.macAddress = macAddress
         # Close socket if it exists
         if self.__sock:
             self.disconnect()
@@ -85,7 +85,7 @@ class ScientISST:
         print("Connecting to device...")
         # Create the client socket
         self.__sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-        self.__sock.connect((self.address, self.__port))
+        self.__sock.connect((self.macAddress, self.__port))
         print("Connected!")
 
     def version(self):
@@ -130,7 +130,7 @@ class ScientISST:
         return version
 
     def start(
-        self, sample_rate, channels, file_name, simulated=False, api=API_MODE_SCIENTISST
+        self, SamplingRate, analogChannels, file_name, simulated=False, api=API_MODE_SCIENTISST
     ):
         """
         Starts a signal acquisition from the device
@@ -158,12 +158,12 @@ class ScientISST:
         InvalidParameterError : if no valid API value is chosen or an incorrect array of channels is provided.
         """
         if self.__num_chs != 0:
-            raise exceptions.DeviceNotIdleError();
+            raise exceptions.DeviceNotIdleError()
 
         if api != API_MODE_SCIENTISST and api != API_MODE_JSON:
-            raise exceptions.InvalidParameterError();
+            raise exceptions.InvalidParameterError()
 
-        self.__sample_rate = sample_rate
+        self.__sample_rate = SamplingRate
         self.__num_chs = 0
 
         # Change API mode
@@ -174,12 +174,12 @@ class ScientISST:
         sr |= self.__sample_rate << 8
         self.__send(sr)
 
-        if not channels:  # channels is empty
+        if not analogChannels:  # channels is empty
             chMask = 0xFF  #  all 8 analog channels
             self.__num_chs = 8
         else:
             chMask = 0
-            for ch in channels:
+            for ch in analogChannels:
                 if ch <= 0 or ch > 8:
                     raise exceptions.InvalidParameterError()
                 self.__chs[self.__num_chs] = ch  # Fill chs vector

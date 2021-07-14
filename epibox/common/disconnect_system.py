@@ -1,9 +1,7 @@
 # local
-from epibox.bitalino import bitalino
-from epibox.scientisst import scientisst
-from . import close_file 
+from epibox.common.close_file import close_file 
 
-def disconnect_system(devices, a_file, annot_file, drift_log_file, header): 
+def disconnect_system(devices, a_file=None, annot_file=None, drift_log_file=None, header=None, files_open=True): 
 
     for device in devices:
         try:
@@ -12,6 +10,6 @@ def disconnect_system(devices, a_file, annot_file, drift_log_file, header):
                 device.close()
         except:
             continue
-    
 
-    close_file.close_file(a_file, annot_file, drift_log_file)
+    if files_open:
+        close_file(a_file, annot_file, drift_log_file)
