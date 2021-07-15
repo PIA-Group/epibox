@@ -10,9 +10,9 @@ script: tox
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
-  user: anascacais
+  user: __token__
   password:
-    secure: PLEASE_REPLACE_ME
+    secure: pypi-AgEIcHlwaS5vcmcCJGNjZmE1MTI0LTM0N2EtNDIxOC04OWZkLTVhNGY0NTAwODBiZQACJXsicGVybWlzc2lvbnMiOiAidXNlciIsICJ2ZXJzaW9uIjogMX0AAAYgZ2jNPVDUZNLh4086KtibNXuu7rAcQkDNU5GW-uVCKq0
   true:
     tags: true
     repo: anascacais/epibox

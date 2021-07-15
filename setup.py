@@ -4,13 +4,15 @@
 
 from setuptools import setup, find_packages
 
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = ['Click>=7.0', ]
+with open('requirements.txt') as requirements_file:
+    requirements = requirements_file.read().splitlines()
+
 
 test_requirements = [ ]
 
@@ -36,14 +38,16 @@ setup(
     },
     install_requires=requirements,
     license="MIT license",
+    long_description_content_type='text/markdown',
     long_description=readme + '\n\n' + history,
     include_package_data=True,
-    keywords='epibox',
+    keywords=['epibox', 'signal acquisition', 'Raspberry Pi'],
     name='epibox',
     packages=find_packages(include=['epibox', 'epibox.*']),
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/anascacais/epibox',
+    download_url ='https://github.com/anascacais/epibox/archive/refs/tags/v0.1.0.tar.gz',
     version='0.1.0',
     zip_safe=False,
 )

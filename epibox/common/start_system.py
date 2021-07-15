@@ -8,7 +8,6 @@ import numpy as np
 # local
 from epibox.common.write_file import write_file
 from epibox.common.read_modules import read_modules
-from epibox.bitalino import sync_bitalino
 
 
 def start_system(devices, a_file, drift_log_file, fs, mac_channels, sensors, save_fmt, header):
@@ -20,8 +19,7 @@ def start_system(devices, a_file, drift_log_file, fs, mac_channels, sensors, sav
     
     for i in range(len(devices)):
         sync_param['sync_arr_'+chr(ord('@')+i+1)] = np.zeros(1000, dtype = float)
-    
-    sync_param['dig_Out'] = sync_bitalino(dig_Out, devices[0])
+
 
     # Initialize devices
     for device in devices:
