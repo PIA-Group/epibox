@@ -8,16 +8,16 @@ from datetime import datetime
 import numpy as np
 
 # local 
-from .read_modules import read_modules
-from .close_file import close_file
-from .write_file import write_file
-from .open_file import open_file
+from epibox.common.read_modules import read_modules
+from epibox.common.close_file import close_file
+from epibox.common.write_file import write_file
+from epibox.common.open_file import open_file
 
 
 def run_system(devices, a_file, annot_file, drift_log_file, sync_param, directory, mac_channels, sensors, fs, save_fmt, header):
 	
     if time.time()-sync_param['strtime'] > 5:
-        #sync_param['dig_Out'] = sync_bitalino(sync_param['dig_Out'], devices[0])
+
         sync_param['strtime'] = time.time()
         now = datetime.now()
         sync_time = now.strftime("%Y-%m-%d %H:%M:%S.%f").rstrip('0')

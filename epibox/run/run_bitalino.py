@@ -20,6 +20,7 @@ from epibox.common.run_system import run_system
 from epibox.common.connect_device import connect_device
 from epibox.common import process_data
 
+
 def random_str(length):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for i in range(length))
@@ -111,6 +112,7 @@ def main(devices):
         write_annot = False
         pause_acq = False
         already_notified_pause = False
+        system_started = False
         
         print('ID: {}'.format(opt['patient_id']))
         print('folder: {}'.format(opt['initial_dir']))
@@ -120,7 +122,9 @@ def main(devices):
         print('devices: {}'.format(opt['devices_mac']))
         print('sensors: {}'.format(sensors))
         print('service: {}'.format(service))
-    
+        print('Devices in list: {}'.format([d.macAddress for d in devices]))
+                            
+                            
         # Use/create the patient folder =============================================================== 
         directory = create_folder(opt['initial_dir'], '{}'.format(opt['patient_id']), service)
         already_timed_out = False   
@@ -136,6 +140,7 @@ def main(devices):
             # Disconnect the system
             print('Could not open the files')
             disconnect_system(devices, files_open=False)
+            system_started = False
             pid = subprocess.run(['sudo', 'pgrep', 'python'], capture_output=True, text=True).stdout.split('\n')[:-1]
             for p in pid:
                 subprocess.run(['kill', '-9', p])
@@ -176,21 +181,32 @@ def main(devices):
                     already_notified_pause = True
                 
                 elif not pause_acq:
-                    already_notified_pause = False
-
-                    try:
-                        _, t_disp, sync_param = start_system(devices, a_file, drift_log_file, opt['fs'], channels, sensors, save_fmt, header)
-                        client.publish('rpi', "['ACQUISITION ON']")
-    
-                        t_display = process_data.decimate(t_disp, opt['fs'])
-                                    
-                        json_data = json.dumps(['DATA', t_display, channels, sensors])
-                        client.publish('rpi', json_data)
-                        already_timed_out = False
+                    
+                    if (already_notified_pause):
+                        print('paused and restarting')
+                        client.publish('rpi', "['RECONNECTING']")
                         
-                    except Exception as e:
-                        print(e)
-                        pass
+                    already_notified_pause = False
+                    
+                    if not system_started:
+                    
+                        try:
+                        
+                            _, t_disp, sync_param = start_system(devices, a_file, drift_log_file, opt['fs'], channels, sensors, save_fmt, header)
+                            system_started = True
+                            client.publish('rpi', "['ACQUISITION ON']")
+        
+                            t_display = process_data.decimate(t_disp, opt['fs'])
+                            print('t_display: {}'.format(t_display))
+                            json_data = json.dumps(['DATA', t_display, channels, sensors])
+                            client.publish('rpi', json_data)
+                            already_timed_out = False
+                            
+                            
+                            
+                        except Exception as e:
+                            print(e)
+                            pass
                     
                     # Acquisition LOOP =========================================================================
                     # try to read from the device--------------------------------------------------------------------------------------------------
@@ -219,12 +235,12 @@ def main(devices):
                         
                         # Disconnect the system
                         disconnect_system(devices, a_file, annot_file, drift_log_file)
+                        system_started = False
                         sync_param['mode'] = 0
                         
                         # Reconnect the devices
                         try:
                             #*********** Connection to BITalino devices ***********#
-                            
                             for i, mac in enumerate(opt['devices_mac']):
                             
                                 init_connect_time = time.time()
@@ -249,12 +265,12 @@ def main(devices):
                                         connected = False
                                         connected, devices = connect_device(mac, client, devices)
 
-                                        if connected and mac in [d.mac for d in devices]:
+                                        if connected and mac in [d.macAddress for d in devices]:
                                             break
     
                                     except Exception as e:
                                         print(e)
-                                        print('Failed at connecting to BITalino')
+                                        print('HERE Failed at connecting to BITalino')
                                         sync_param['mode'] = 0
                                         if already_timed_out == False and time.time() - init_connect_time > 10:
                                             timeout_json = json.dumps(['TIMEOUT', '{}'.format(mac)])
@@ -265,7 +281,7 @@ def main(devices):
                             
                             print('Devices in list: {}'.format([d.macAddress for d in devices]))
                             
-                            a_file, annot_file, drift_log_file, save_fmt, header = open_file(directory, devices, channels, sensors, opt['fs'], saveRaw)
+                            a_file, annot_file, drift_log_file, save_fmt, header = open_file(directory, devices, channels, sensors, opt['fs'], saveRaw, service)
                         
                             # Acquisition LOOP =========================================================================
                                 
@@ -282,6 +298,7 @@ def main(devices):
                             client.publish('rpi', battery_json)
                             
                             _, t_disp, sync_param = start_system(devices, a_file, drift_log_file, opt['fs'], channels, sensors, save_fmt, header)
+                            system_started = True
                             print('The system is running again ...')
                             client.publish('rpi', "['ACQUISITION ON']")
                             
@@ -317,6 +334,7 @@ def main(devices):
         
         # Disconnect the system
         disconnect_system(devices, a_file, annot_file, drift_log_file)
+        system_started = False
         print('You have stopped the acquistion. Saving all the files ...')
         time.sleep(3)
         pid = subprocess.run(['sudo', 'pgrep', 'python'], capture_output=True, text=True).stdout.split('\n')[:-1]
@@ -330,6 +348,7 @@ def main(devices):
         
         # Disconnect the system
         disconnect_system(devices, a_file, annot_file, drift_log_file)
+        system_started = False
         print('You have stopped the acquistion. Saving all the files ...')
         time.sleep(3)
         pid = subprocess.run(['sudo', 'pgrep', 'python'], capture_output=True, text=True).stdout.split('\n')[:-1]

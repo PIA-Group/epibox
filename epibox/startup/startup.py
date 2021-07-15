@@ -14,31 +14,31 @@ import paho.mqtt.client as mqtt
 from epibox.common.connect_device import connect_device
 from epibox.run import run_bitalino
 
-
 def random_str(length):
+
     letters = string.ascii_letters
+
     return ''.join(random.choice(letters) for i in range(length))
 
-    
 def on_message(client, userdata, message):
-   
+
     global sys_args
     global devices
 
     message = str(message.payload.decode("utf-8"))
     print(message)
-
     message = ast.literal_eval(message)
-
 
     if message == ['Send default']:
 
         ######## Default MAC addresses ########
+
         with open('/home/pi/Documents/epibox/listMAC.json', 'r') as json_file:
             listMAC = json_file.read()
 
         listMAC = ast.literal_eval(listMAC)
         listMAC2 = "'DEFAULT MAC','{}','{}'".format(list(listMAC.values())[0], list(listMAC.values())[1])
+
         client.publish(topic='rpi', qos=2, payload=listMAC2)
 
         ######## Available drives ########
@@ -55,8 +55,9 @@ def on_message(client, userdata, message):
 
         client.publish(topic='rpi', qos=2, payload="{}".format(listDrives))
 
-
+        
         ######## Default configurations ########
+
         with open('/home/pi/Documents/epibox/config_default.json', 'r') as json_file:
             defaults = json_file.read()
 
@@ -64,6 +65,7 @@ def on_message(client, userdata, message):
         config = json.dumps(['DEFAULT CONFIG', defaults])
 
         client.publish(topic='rpi', qos=2, payload=config)
+
 
     ######## New default configuration ########
 
@@ -73,6 +75,8 @@ def on_message(client, userdata, message):
 
         with open('/home/pi/Documents/epibox/config_default.json', 'w') as json_file:
             json.dump(defaults, json_file)
+
+            
 
     elif message[0] == 'NEW MAC':
         listMAC = message[1]
@@ -87,22 +91,22 @@ def on_message(client, userdata, message):
         subprocess.run(["sudo", "date", "-s", message[1]])
         subprocess.run(["sudo", "date"], capture_output=True, text=True)
 
+
     ##### Connect devices #####
 
     elif message[0] == 'CONNECT':
-
         mac = message[1]
-        service = message[2]
 
         if mac != ' ' and mac != '' and message[1] not in sys_args['devices_mac']:
             sys_args['devices_mac'] += [mac]
 
         _, devices = connect_device(mac, client, devices)
 
- 
+
     ####### Set configurations ########
 
     elif message[0] == 'FOLDER':
+
         if message[1] == 'RPi':
             folder = '/home/pi/Documents/epibox/acquisitions'
 
@@ -111,24 +115,21 @@ def on_message(client, userdata, message):
 
         sys_args['initial_dir'] = folder
 
-
+    
     elif message[0] == 'FS':
         fs = message[1]
         sys_args['fs'] = fs
 
     
-
     elif message[0] == 'SAVE RAW':
         saveRaw = message[1]
         sys_args['saveRaw'] = saveRaw
 
-        
 
     elif message[0] == 'EPI SERVICE':
         epi_service = message[1]
         sys_args['service'] = epi_service
 
-        
 
     elif message[0] == 'CHANNELS':
         channels = message[1]
@@ -141,7 +142,7 @@ def on_message(client, userdata, message):
         patient_id = message[1]
         sys_args['patient_id'] = patient_id
 
-        
+
     ####### System actions #######
 
     elif message[0] == 'TURN OFF':
@@ -155,7 +156,7 @@ def on_message(client, userdata, message):
     elif message[0] == 'START':
         client.keepAlive = False
 
-    
+ 
 def main():
 
     global devices
@@ -191,7 +192,7 @@ def main():
 
         run_bitalino.main(devices)
 
-
+    
 if __name__ == '__main__':
 
     main()

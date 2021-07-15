@@ -13,3 +13,5 @@ def disconnect_system(devices, a_file=None, annot_file=None, drift_log_file=None
 
     if files_open:
         close_file(a_file, annot_file, drift_log_file)
+
+
