@@ -106,4 +106,3 @@ ENV/
 
 # others
 .pypirc
-.travis.yml
