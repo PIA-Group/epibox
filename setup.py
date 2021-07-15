@@ -46,6 +46,6 @@ setup(
     tests_require=test_requirements,
     url='https://github.com/anascacais/epibox',
     download_url ='https://github.com/anascacais/epibox/archive/refs/tags/v0.1.0.tar.gz',
-    version='0.1.0',
+    version='0.1.1',
     zip_safe=False,
 )
