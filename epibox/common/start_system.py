@@ -1,6 +1,6 @@
 # built-in
 import time
-import datetime
+from datetime import datetime
 
 # third-party
 import numpy as np
@@ -36,7 +36,7 @@ def start_system(devices, a_file, drift_log_file, fs, mac_channels, sensors, sav
     now = datetime.now()
     print('start {}'.format(datetime.now()))
     sync_param['sync_time'] = now.strftime("%Y-%m-%d %H:%M:%S.%f")
-    print(now.strftime("%Y-%m-%d %H:%M:%S.%f"))
+    print('just before read_modules')
     t, t_str, t_display = read_modules(devices, mac_channels, sensors, header)
  
     sync_param['save_log'] = 1

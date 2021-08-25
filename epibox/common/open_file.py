@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 
 # local
-from epibox.bitalino.header2bitalino import header2bitalino
+from epibox.bit.header2bitalino import header2bitalino
 from epibox.scientisst.header2scientisst import header2scientisst
 
 

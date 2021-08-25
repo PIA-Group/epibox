@@ -1,4 +1,5 @@
 
+
 # built-in
 import time
 import sys
@@ -15,7 +16,7 @@ from epibox.common.open_file import open_file
 
 
 def run_system(devices, a_file, annot_file, drift_log_file, sync_param, directory, mac_channels, sensors, fs, save_fmt, header):
-	
+    
     if time.time()-sync_param['strtime'] > 5:
 
         sync_param['strtime'] = time.time()
@@ -30,6 +31,7 @@ def run_system(devices, a_file, annot_file, drift_log_file, sync_param, director
     
     now = datetime.now()
     sync_param['sync_time'] = now.strftime("%Y-%m-%d %H:%M:%S.%f")
+    print('just before read_modules')
     t, t_str, t_display = read_modules(devices, mac_channels, sensors, header)
 
     
@@ -42,8 +44,12 @@ def run_system(devices, a_file, annot_file, drift_log_file, sync_param, director
     # print elapsed time
     sys.stdout.write("\rElapsed time (seconds): % i " % i)
     sys.stdout.flush()
-
-    write_file(t, a_file, drift_log_file, sync_param, str(i), save_fmt)
+    
+    try:
+        write_file(t, a_file, drift_log_file, sync_param, str(i), save_fmt)
+        
+    except Exception as e:
+        print(e)
 
     # Open new file each hour
     if sync_param['close_file'] == 1:

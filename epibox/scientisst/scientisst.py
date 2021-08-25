@@ -130,7 +130,7 @@ class ScientISST:
         return version
 
     def start(
-        self, SamplingRate, analogChannels, file_name, simulated=False, api=API_MODE_SCIENTISST
+        self, SamplingRate, analogChannels, file_name=None, simulated=False, api=API_MODE_SCIENTISST
     ):
         """
         Starts a signal acquisition from the device
@@ -205,7 +205,8 @@ class ScientISST:
         self.__packet_size = self.__getPacketSize()
 
         # Open file and write header
-        self.__initFile(file_name)
+        if file_name != None:
+            self.__initFile(file_name)
 
     def read(self, num_frames):
         """
@@ -304,9 +305,9 @@ class ScientISST:
             else:
                 raise exceptions.NotSupportedError()
 
-
-            self.__writeFrameFile(f)
-
+            
+            #self.__writeFrameFile(f)
+    
         return frames
 
     def stop(self):
@@ -338,7 +339,7 @@ class ScientISST:
         self.__clear()
 
         # fclose(output_fd);
-        self.__f.close()
+        #self.__f.close()
 
     def battery(self, value=0):
         """

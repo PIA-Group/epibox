@@ -8,10 +8,12 @@ import numpy as np
 
 def read_modules(devices, mac_channels, sensors, header):
 
+    
     t = np.array([])
     t_display = np.array([])
     print('devices: {}'.format([d.macAddress for d in devices]))
-
+    channels2get = [int(mac_chn[1])-1 for mac_chn in mac_channels]
+        
     for i, device in enumerate(devices):
 
         t_read = device.read(100)
@@ -30,10 +32,11 @@ def read_modules(devices, mac_channels, sensors, header):
                 seq += [frame['sequence']]
 
                 if len(t_nseq) == 0:
-                    t_nseq = np.reshape(np.array(frame['analog']), (1,-1))
-
+                    t_nseq_aux = np.reshape(np.array(frame['analog']), (1,-1))
+                    t_nseq = np.reshape(np.take(t_nseq_aux, channels2get), (1,-1))
                 else:
-                    t_nseq = np.vstack((t_nseq, np.reshape(np.array(frame['analog']), (1,-1))))
+                    t_nseq_aux = np.reshape(np.take(np.reshape(np.array(frame['analog']), (1,-1)), channels2get), (1,-1))
+                    t_nseq = np.vstack((t_nseq, t_nseq_aux))
 
             t_read = np.hstack((np.reshape(np.array(seq), (-1,1)), t_nseq))
 
@@ -72,10 +75,9 @@ def read_modules(devices, mac_channels, sensors, header):
             aux = np.concatenate((np.reshape(t_read[:,0], (-1,1)), display_aux), axis=1)
             t = np.concatenate((t, aux), axis=1)
 
-
     t_str = '\n'.join(' '.join('%0.1f' %x for x in y) for y in t)
-
     return t, t_str, t_display
+
 
 
 def get_transform(raw, signal_type, res):

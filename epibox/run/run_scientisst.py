@@ -145,23 +145,7 @@ def main(devices):
             pid = subprocess.run(['sudo', 'pgrep', 'python'], capture_output=True, text=True).stdout.split('\n')[:-1]
             for p in pid:
                 subprocess.run(['kill', '-9', p])
-    
-        
-        #*********** ****************************** ***********#
-        if service != 'Mini':
-            battery = {}
-            for device in devices:
-                state = device.state()
-                if state['battery'] > 63:
-                    battery_volts = 2 * ((state['battery']*3.3) / (2**10-1))
-                else:
-                    battery_volts = 2 * ((state['battery']*3.3) / (2**6-1))
-                    
-                battery[device.macAddress] = battery_volts
-            battery_json = json.dumps(['BATTERY', battery])
-            
-            client.publish('rpi', battery_json)
-            
+             
 
         # Starting Acquisition LOOP =========================================================================
         try:
@@ -219,7 +203,7 @@ def main(devices):
                 
                     try:
                         _, t_disp, a_file, drift_log_file, sync_param = run_system(devices, a_file, annot_file, drift_log_file, sync_param, directory, channels, sensors, opt['fs'], save_fmt, header)
-                        
+                    
                         t_display = process_data.decimate(t_disp, opt['fs'])
                                     
                         json_data = json.dumps(['DATA', t_display, channels, sensors])
@@ -246,7 +230,7 @@ def main(devices):
                         
                         # Reconnect the devices
                         try:
-                            #*********** Connection to BITalino devices ***********#
+                            #*********** Connection to ScientISST devices ***********#
                             for i, mac in enumerate(opt['devices_mac']):
                             
                                 init_connect_time = time.time()
@@ -271,7 +255,7 @@ def main(devices):
                                         connected = False
                                         time.sleep(5)
                                         connected, devices = connect_device(mac, client, devices, service)
-
+                                        
                                         if connected and mac in [d.macAddress for d in devices]:
                                             now = datetime.now()
                                             save_time = now.strftime("%H-%M-%S").rstrip('0')
@@ -294,19 +278,7 @@ def main(devices):
                             a_file, annot_file, drift_log_file, save_fmt, header = open_file(directory, devices, channels, sensors, opt['fs'], saveRaw, service)
                         
                             # Acquisition LOOP =========================================================================
-                                
-                            for device in devices:
-                                state = device.state()
-                                if state['battery'] > 63:
-                                    battery_volts = 2 * ((state['battery']*3.3) / (2**10-1))
-                                else:
-                                    battery_volts = 2 * ((state['battery']*3.3) / (2**6-1))
-                                    
-                                battery[device.macAddress] = battery_volts
-                            battery_json = json.dumps(['BATTERY', battery])
-                            
-                            client.publish('rpi', battery_json)
-                            
+                                                           
                             _, t_disp, sync_param = start_system(devices, a_file, drift_log_file, opt['fs'], channels, sensors, save_fmt, header)
                             system_started = True
                             print('The system is running again ...')
@@ -343,7 +315,7 @@ def main(devices):
         client.loop_stop()
         
         # Disconnect the system
-        disconnect_system(devices, service, a_file, annot_file, drift_log_file)
+        disconnect_system(devices, a_file, annot_file, drift_log_file)
         system_started = False
         print('You have stopped the acquistion. Saving all the files ...')
         time.sleep(3)

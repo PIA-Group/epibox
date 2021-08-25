@@ -39,8 +39,15 @@ def decimate(t, fs):
 
     for i in range(t.shape[1]):
         t_aux = t[:,i]
-        for n in get_factors(fs / 100):
-            t_aux = signal.decimate(t_aux, int(n))
+#         for n in get_factors(fs / 100):
+#             try:
+#                 t_aux = signal.decimate(t_aux, int(n))
+#                 print('after decimate: {}'.format(t_aux))
+#             except Exception as e:
+#                 print(e)
+#                 pass
+        if fs >= 1000:
+            t_aux = signal.decimate(t_aux, 10)
         
         t_display += [t_aux.tolist()]
 

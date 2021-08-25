@@ -1,4 +1,6 @@
 
+from epibox.scientisst import scientisst
+
 def header2scientisst(filename, file_time, file_date, devices, mac_channels, sensors, fs, saveRaw):
     
     filename.write('# OpenSignals Text File Format' + '\n')

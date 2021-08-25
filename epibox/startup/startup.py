@@ -13,6 +13,7 @@ import paho.mqtt.client as mqtt
 # local
 from epibox.common.connect_device import connect_device
 from epibox.run import run_bitalino
+from epibox.run import run_scientisst
 
 def random_str(length):
 
@@ -96,11 +97,12 @@ def on_message(client, userdata, message):
 
     elif message[0] == 'CONNECT':
         mac = message[1]
+        service = message[2]
 
         if mac != ' ' and mac != '' and message[1] not in sys_args['devices_mac']:
             sys_args['devices_mac'] += [mac]
 
-        _, devices = connect_device(mac, client, devices)
+        _, devices = connect_device(mac, client, devices, service)
 
 
     ####### Set configurations ########
@@ -190,7 +192,10 @@ def main():
         with open('/home/pi/Documents/epibox/args.json', 'w') as json_file:
             json.dump(sys_args, json_file)
 
-        run_bitalino.main(devices)
+        if sys_args['service'] == 'Bitalino' or sys_args['service'] == 'Mini':
+            run_bitalino.main(devices)
+        else:
+            run_scientisst.main(devices)
 
     
 if __name__ == '__main__':
