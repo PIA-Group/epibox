@@ -38,7 +38,7 @@ def on_message(client, userdata, message):
             listMAC = json_file.read()
 
         listMAC = ast.literal_eval(listMAC)
-        listMAC2 = "'DEFAULT MAC','{}','{}'".format(list(listMAC.values())[0], list(listMAC.values())[1])
+        listMAC2 = ['DEFAULT MAC', str(list(listMAC.values())[0]), str(list(listMAC.values())[1])]
 
         client.publish(topic='rpi', qos=2, payload=listMAC2)
 
