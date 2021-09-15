@@ -38,7 +38,7 @@ def on_message(client, userdata, message):
             listMAC = json_file.read()
 
         listMAC = ast.literal_eval(listMAC)
-        listMAC2 = ['DEFAULT MAC', str(list(listMAC.values())[0]), str(list(listMAC.values())[1])]
+        listMAC2 = json.dumps(['DEFAULT MAC','{}'.format(list(listMAC.values())[0]),'{}'.format(list(listMAC.values())[1])])
 
         client.publish(topic='rpi', qos=2, payload=listMAC2)
 
@@ -176,27 +176,30 @@ def main():
     setattr(client, 'keepAlive', True)
 
     client.username_pw_set(username='preepiseizures', password='preepiseizures')
-    client.connect(host_name)
-    client.subscribe(topic, 1)
-    client.on_message = on_message
-    client.loop_start()
+    try:
+        client.connect(host_name)
+        client.subscribe(topic, 1)
+        client.on_message = on_message
+        client.loop_start()
 
-    print('Successfully subcribed to topic', topic)
+        print('Successfully subcribed to topic', topic)
 
-    while client.keepAlive == True:
-        continue
+        while client.keepAlive == True:
+            continue
 
-    else:
-        client.loop_stop()
-
-        with open('/home/pi/Documents/epibox/args.json', 'w') as json_file:
-            json.dump(sys_args, json_file)
-
-        if sys_args['service'] == 'Bitalino' or sys_args['service'] == 'Mini':
-            run_bitalino.main(devices)
         else:
-            run_scientisst.main(devices)
+            client.loop_stop()
 
+            with open('/home/pi/Documents/epibox/args.json', 'w') as json_file:
+                json.dump(sys_args, json_file)
+
+            if sys_args['service'] == 'Bitalino' or sys_args['service'] == 'Mini':
+                run_bitalino.main(devices)
+            else:
+                run_scientisst.main(devices)
+
+    except Exception as e:
+        print(e)
     
 if __name__ == '__main__':
 
