@@ -8,6 +8,10 @@ install:
   - pip install -U tox-travis
 script:
   - python tests/test_epibox.py
+
+before_script:
+  - export PYTHONPATH=$PYTHONPATH:$(pwd)
+  
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
