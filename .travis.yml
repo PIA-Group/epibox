@@ -7,7 +7,7 @@ install:
   - pip install -r requirements.txt
   - pip install -U tox-travis
 script:
-  - python tests\test_epibox.py
+  - python tests/test_epibox.py
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
