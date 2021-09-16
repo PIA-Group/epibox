@@ -6,6 +6,7 @@ import os
 import subprocess
 import json
 import shutil
+import pwd
 
 # third-party
 import paho.mqtt.client as mqtt
@@ -30,14 +31,23 @@ def on_message(client, userdata, message):
     print(message)
     message = ast.literal_eval(message)
 
+    
+
     if message == ['Send default']:
+
+        username = pwd.getpwuid(os.getuid())[0]
 
         ######## Default MAC addresses ########
 
-        with open('/home/pi/Documents/epibox/listMAC.json', 'r') as json_file:
-            listMAC = json_file.read()
+        try:
+            with open('/home/{}/Documents/epibox/listMAC.json'.format(username), 'r') as json_file:
+                listMAC = json_file.read()
+                listMAC = ast.literal_eval(listMAC)
 
-        listMAC = ast.literal_eval(listMAC)
+        except Exception as e:
+            listMAC = {"MAC1": "", "MAC2": ""}
+
+        
         listMAC2 = json.dumps(['DEFAULT MAC','{}'.format(list(listMAC.values())[0]),'{}'.format(list(listMAC.values())[1])])
 
         client.publish(topic='rpi', qos=2, payload=listMAC2)
@@ -45,10 +55,10 @@ def on_message(client, userdata, message):
         ######## Available drives ########
 
         listDrives = ['DRIVES']
-        drives = os.listdir('/media/pi')
+        drives = os.listdir('/media/{}/'.format(username))
 
         for drive in drives:
-            total, _ , free = shutil.disk_usage('/media/pi/{}'.format(drive))
+            total, _ , free = shutil.disk_usage('/media/{}/{}'.format(username, drive))
             listDrives += ['{} ({:.1f}% livre)'.format(drive, (free/total)*100)]
 
         total, _ , free = shutil.disk_usage('/')
@@ -59,10 +69,15 @@ def on_message(client, userdata, message):
         
         ######## Default configurations ########
 
-        with open('/home/pi/Documents/epibox/config_default.json', 'r') as json_file:
-            defaults = json_file.read()
+        try:
+            with open('/home/{}/Documents/epibox/config_default.json'.format(username), 'r') as json_file:
+                defaults = json_file.read()
+                defaults = ast.literal_eval(defaults)
 
-        defaults = ast.literal_eval(defaults)
+        except Exception as e:
+            defaults = {"initial_dir": "", 'fs': 1000, 'channels': [], 'saveRaw': 'true', 'devices_mac': [], 'patient_id': 'default', 'service': 'Bitalino'}
+
+        
         config = json.dumps(['DEFAULT CONFIG', defaults])
 
         client.publish(topic='rpi', qos=2, payload=config)
@@ -71,18 +86,22 @@ def on_message(client, userdata, message):
     ######## New default configuration ########
 
     elif message[0] == 'NEW CONFIG DEFAULT':
+        username = pwd.getpwuid(os.getuid())[0]
+
         config = message[1]
         defaults = {'initial_dir': config[0], 'fs': config[1], 'channels': config[2], 'saveRaw': config[3]}
 
-        with open('/home/pi/Documents/epibox/config_default.json', 'w') as json_file:
+        with open('/home/{}/Documents/epibox/config_default.json'.format(username), 'w+') as json_file:
             json.dump(defaults, json_file)
 
             
 
     elif message[0] == 'NEW MAC':
+        username = pwd.getpwuid(os.getuid())[0]
+
         listMAC = message[1]
 
-        with open('/home/pi/Documents/epibox/listMAC.json', 'w') as json_file:
+        with open('/home/{}/Documents/epibox/listMAC.json'.format(username), 'w+') as json_file:
             json.dump(listMAC, json_file)
 
 
@@ -108,12 +127,13 @@ def on_message(client, userdata, message):
     ####### Set configurations ########
 
     elif message[0] == 'FOLDER':
+        username = pwd.getpwuid(os.getuid())[0]
 
         if message[1] == 'RPi':
-            folder = '/home/pi/Documents/epibox/acquisitions'
+            folder = '/home/{}/Documents/epibox/acquisitions'.format(username)
 
         else: 
-            folder = '/media/pi/' + message[1] + '/acquisitions'
+            folder = '/media/{}/'.format(username) + message[1] + '/acquisitions'
 
         sys_args['initial_dir'] = folder
 
@@ -190,7 +210,9 @@ def main():
         else:
             client.loop_stop()
 
-            with open('/home/pi/Documents/epibox/args.json', 'w') as json_file:
+            username = pwd.getpwuid(os.getuid())[0]
+
+            with open('/home/{}/Documents/epibox/args.json'.format(username), 'w+') as json_file:
                 json.dump(sys_args, json_file)
 
             if sys_args['service'] == 'Bitalino' or sys_args['service'] == 'Mini':

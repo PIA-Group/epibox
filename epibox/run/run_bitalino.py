@@ -6,6 +6,8 @@ import time
 import string
 import subprocess
 from datetime import datetime
+import pwd
+import os
 
 # third-party
 import paho.mqtt.client as mqtt
@@ -81,10 +83,11 @@ def main(devices):
         client.on_message = on_message
         client.loop_start()
         print('Successfully subcribed to topic', topic)
-        init = False
-        client.publish('rpi', "['STARTING']")
 
-        with open('/home/pi/Documents/epibox/args.json', 'r') as json_file:
+        client.publish('rpi', "['STARTING']")
+        
+        username = pwd.getpwuid(os.getuid())[0]
+        with open('/home/{}/Documents/epibox/args.json'.format(username), 'r') as json_file:
             opt = json_file.read()
             
         opt = ast.literal_eval(opt)
