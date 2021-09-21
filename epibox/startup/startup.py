@@ -91,6 +91,11 @@ def on_message(client, userdata, message):
         config = message[1]
         defaults = {'initial_dir': config[0], 'fs': config[1], 'channels': config[2], 'saveRaw': config[3]}
 
+        if not os.path.exists('/home/{}/Documents/epibox'.format(username)):
+            oldmask = os.umask(000)
+            os.makedirs('/home/{}/Documents/epibox'.format(username), mode=0o777)
+            os.umask(oldmask)
+
         with open('/home/{}/Documents/epibox/config_default.json'.format(username), 'w+') as json_file:
             json.dump(defaults, json_file)
 
@@ -100,6 +105,11 @@ def on_message(client, userdata, message):
         username = pwd.getpwuid(os.getuid())[0]
 
         listMAC = message[1]
+
+        if not os.path.exists('/home/{}/Documents/epibox'.format(username)):
+            oldmask = os.umask(000)
+            os.makedirs('/home/{}/Documents/epibox'.format(username), mode=0o777)
+            os.umask(oldmask)
 
         with open('/home/{}/Documents/epibox/listMAC.json'.format(username), 'w+') as json_file:
             json.dump(listMAC, json_file)
@@ -211,6 +221,11 @@ def main():
             client.loop_stop()
 
             username = pwd.getpwuid(os.getuid())[0]
+
+            if not os.path.exists('/home/{}/Documents/epibox'.format(username)):
+                oldmask = os.umask(000)
+                os.makedirs('/home/{}/Documents/epibox'.format(username), mode=0o777)
+                os.umask(oldmask)
 
             with open('/home/{}/Documents/epibox/args.json'.format(username), 'w+') as json_file:
                 json.dump(sys_args, json_file)
