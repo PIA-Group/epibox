@@ -20,9 +20,7 @@ from epibox.run import run_bitalino
 from epibox.run import run_scientisst
 
 def random_str(length):
-
     letters = string.ascii_letters
-
     return ''.join(random.choice(letters) for i in range(length))
 
 def on_message(client, userdata, message):
@@ -218,7 +216,7 @@ def main():
     sys_args = {'initial_dir': None, 'fs': None, 'channels': None, 'saveRaw': None, 'devices_mac': [], 'patient_id': None, 'service': None}
 
     global timestamps_file
-    timestamps_file = open_timestamps_file('/home/ana/Documents/epibox', 'startup')
+    timestamps_file, startup_time = open_timestamps_file('/home/ana/Documents/epibox', 'startup')
 
     client_name = random_str(6)
     print('Client name (startup):', client_name)
@@ -256,7 +254,7 @@ def main():
                 json.dump(sys_args, json_file)
 
             if sys_args['service'] == 'Bitalino' or sys_args['service'] == 'Mini':
-                run_bitalino.main(devices)
+                run_bitalino.main(devices, startup_time)
             else:
                 run_scientisst.main(devices)
 
