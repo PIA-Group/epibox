@@ -6,6 +6,14 @@ import os
 from epibox.bit.header2bitalino import header2bitalino
 from epibox.scientisst.header2scientisst import header2scientisst
 
+def open_timestamps_file(directory, stage):
+    now = datetime.now()
+    save_time = now.strftime("%Y-%m-%d %H-%M-%S").rstrip('0')
+
+    a_file = open(os.path.join(directory, 'mqtt_timestamps_' + '{}_'.format(stage) + save_time + '.txt'), 'w')
+
+    return a_file
+
 
 def open_file(directory, devices, mac_channels, sensors, fs, saveRaw, service):
 

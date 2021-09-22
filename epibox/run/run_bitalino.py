@@ -16,8 +16,8 @@ import paho.mqtt.client as mqtt
 from epibox.startup import startup 
 from epibox.common.disconnect_system import disconnect_system
 from epibox.common.create_folder import create_folder
-from epibox.common.open_file import open_file
-from epibox.common.write_file import write_annot_file
+from epibox.common.open_file import open_file, open_timestamps_file
+from epibox.common.write_file import write_annot_file, write_mqtt_timestamp
 from epibox.common.start_system import start_system
 from epibox.common.run_system import run_system
 from epibox.common.connect_device import connect_device
@@ -33,6 +33,12 @@ def on_message(client, userdata, message):
     message = str(message.payload.decode("utf-8"))
     message = ast.literal_eval(message)
     print("message received: ", message)
+
+    # save timestamps for performance testing
+    t = time.time()
+    if message[0] in ['BATTERY', 'DATA', 'TIMEOUT', 'ERROR', 'TURNED OFF', 'STARTING', 'ACQUISITION ON', 'RECONNECTING', 'PAIRING', 'STOPPED', 'PAUSED']:
+        t = time.time()
+        write_mqtt_timestamp(timestamps_file, t, message[-1], message[0])
     
     if message[0] == 'RESTART':
         client.loop_stop()
@@ -59,7 +65,11 @@ def on_message(client, userdata, message):
         
     elif message[0] == 'TURN OFF':
         print('TURNING OFF RPI')
-        client.publish(topic='rpi', payload=str(['TURNED OFF']))
+
+        id = random_str(6)
+        t = time.time()
+        client.publish(topic='rpi', payload=str(['TURNED OFF', id]))
+        write_mqtt_timestamp(timestamps_file, t, id, 'TURNED OFF')
     
     elif message[0] == 'TURNED OFF':
         subprocess.run(['sudo', 'shutdown', '-h', 'now'])
@@ -84,12 +94,19 @@ def main(devices):
         client.loop_start()
         print('Successfully subcribed to topic', topic)
 
-        client.publish('rpi', "['STARTING']")
+        global timestamps_file
+        timestamps_file = open_timestamps_file('/home/ana/Documents/epibox', 'run')
+
+        id = random_str(6)
+        t = time.time()
+        client.publish('rpi', str(['STARTING', id]))
+        write_mqtt_timestamp(timestamps_file, t, id, 'STARTING')
         
         username = pwd.getpwuid(os.getuid())[0]
         with open('/home/{}/Documents/epibox/args.json'.format(username), 'r') as json_file:
             opt = json_file.read()
             
+        print(opt)
         opt = ast.literal_eval(opt)
         
         if not opt['channels']:
@@ -138,12 +155,17 @@ def main(devices):
 
         except Exception as e:
             print(e)
-            client.publish('rpi', "['ERROR']")
+            id = random_str(6)
+            t = time.time()
+            client.publish('rpi', str(['ERROR', id]))
+            write_mqtt_timestamp(timestamps_file, t, id, 'ERROR')
+            
             client.loop_stop()
             
             # Disconnect the system
             print('Could not open the files')
-            disconnect_system(devices, service, files_open=False)
+            disconnect_system(devices, service, files_open=False, timestamps_file=timestamps_file)
+            
             system_started = False
             pid = subprocess.run(['sudo', 'pgrep', 'python'], capture_output=True, text=True).stdout.split('\n')[:-1]
             for p in pid:
@@ -161,9 +183,13 @@ def main(devices):
                     battery_volts = 2 * ((state['battery']*3.3) / (2**6-1))
                     
                 battery[device.macAddress] = battery_volts
-            battery_json = json.dumps(['BATTERY', battery])
             
+            id = random_str(6)
+            battery_json = json.dumps(['BATTERY', battery, id])
+            
+            t = time.time()
             client.publish('rpi', battery_json)
+            write_mqtt_timestamp(timestamps_file, t, id, 'BATTERY')
             
 
         # Starting Acquisition LOOP =========================================================================
@@ -180,15 +206,23 @@ def main(devices):
                         except Exception as e:
                             print(e)
                             continue
-                     
-                    client.publish('rpi', "['PAUSED']")
+
+                    id = random_str(6) 
+                    t = time.time()
+                    client.publish('rpi', str(['PAUSED', id]))
+                    write_mqtt_timestamp(timestamps_file, t, id, 'PAUSED')
+
                     already_notified_pause = True
                 
                 elif not pause_acq:
                     
                     if (already_notified_pause):
                         print('paused and restarting')
-                        client.publish('rpi', "['RECONNECTING']")
+
+                        id = random_str(6) 
+                        t = time.time()
+                        client.publish('rpi', str(['RECONNECTING'], id))
+                        write_mqtt_timestamp(timestamps_file, t, id, 'RECONNECTING')
                         
                     already_notified_pause = False
                     
@@ -198,14 +232,23 @@ def main(devices):
                         
                             _, t_disp, sync_param = start_system(devices, a_file, drift_log_file, opt['fs'], channels, sensors, save_fmt, header)
                             system_started = True
-                            client.publish('rpi', "['ACQUISITION ON']")
+
+                            id = random_str(6) 
+                            t = time.time()
+                            client.publish('rpi', str(['ACQUISITION ON', id]))
+                            write_mqtt_timestamp(timestamps_file, t, id, 'ACQUISITION ON')
         
                             t_display = process_data.decimate(t_disp, opt['fs'])
                             print('t_display: {}'.format(t_display))
-                            json_data = json.dumps(['DATA', t_display, channels, sensors])
+
+                            id = random_str(6)
+                            json_data = json.dumps(['DATA', t_display, channels, sensors, id])
+    
+                            t = time.time()
                             client.publish('rpi', json_data)
+                            write_mqtt_timestamp(timestamps_file, t, id, 'DATA')
+
                             already_timed_out = False
-                            
                             
                             
                         except Exception as e:
@@ -224,9 +267,13 @@ def main(devices):
                         _, t_disp, a_file, drift_log_file, sync_param = run_system(devices, a_file, annot_file, drift_log_file, sync_param, directory, channels, sensors, opt['fs'], save_fmt, header)
                         
                         t_display = process_data.decimate(t_disp, opt['fs'])
-                                    
-                        json_data = json.dumps(['DATA', t_display, channels, sensors])
+
+                        id = random_str(6)            
+                        json_data = json.dumps(['DATA', t_display, channels, sensors, id])
+                        t = time.time()
                         client.publish('rpi', json_data)
+                        write_mqtt_timestamp(timestamps_file, t, id, 'DATA')
+
                         already_timed_out = False
                         
                     # Handle misconnection of the devices--------------------------------------------------------------------------------------------
@@ -235,14 +282,18 @@ def main(devices):
                         print('')
                         print('The system has stopped running because ' + str(e) + '! Please check Modules!')
                         print('Trying to Reconnect....')
-                        client.publish('rpi', "['RECONNECTING']")
+
+                        id = random_str(6)
+                        t = time.time()
+                        client.publish('rpi', str(['RECONNECTING', id]))
+                        write_mqtt_timestamp(timestamps_file, t, id, 'RECONNECTING')
                         
                         # Disconnect the system
                         now = datetime.now()
                         save_time = now.strftime("%H-%M-%S").rstrip('0')
                         write_annot_file(annot_file, ['disconnection', save_time])
                         
-                        disconnect_system(devices, service, a_file, annot_file, drift_log_file)
+                        disconnect_system(devices, service, a_file, annot_file, drift_log_file, timestamps_file=timestamps_file)
                         devices = []
                         system_started = False
                         sync_param['mode'] = 0
@@ -258,12 +309,17 @@ def main(devices):
                                 while client.keepAlive == True:
     
                                     if (time.time() - init_connect_time) > 120:
-                                        client.publish('rpi', "['STOPPED']")
+
+                                        id = random_str(6)
+                                        t = time.time()
+                                        client.publish('rpi', str(['STOPPED', id]))
+                                        write_mqtt_timestamp(timestamps_file, t, id, 'STOPPED')
+
                                         client.loop_stop()
                                         print('TIMEOUT')
                                         
                                         # Disconnect the system
-                                        disconnect_system(devices, service, a_file, annot_file, drift_log_file)
+                                        disconnect_system(devices, service, a_file, annot_file, drift_log_file, timestamps_file=timestamps_file)
                                         client.keepAlive == False
                                         pass
                                     
@@ -286,9 +342,12 @@ def main(devices):
                                         print('HERE Failed at connecting to BITalino')
                                         sync_param['mode'] = 0
                                         if already_timed_out == False and time.time() - init_connect_time > 10:
-                                            timeout_json = json.dumps(['TIMEOUT', '{}'.format(mac)])
+
+                                            id = random_str(6)
+                                            timeout_json = json.dumps(['TIMEOUT', '{}'.format(mac), id])
                                             client.publish('rpi', timeout_json)
-                                            print('SENT TIMEOUT')
+                                            write_mqtt_timestamp(timestamps_file, t, id, 'TIMEOUT')
+                                            
                                             already_timed_out = True
                                             init_connect_time = time.time()
                             
@@ -306,19 +365,30 @@ def main(devices):
                                     battery_volts = 2 * ((state['battery']*3.3) / (2**6-1))
                                     
                                 battery[device.macAddress] = battery_volts
-                            battery_json = json.dumps(['BATTERY', battery])
-                            
+
+                            id = random_str(6)    
+                            battery_json = json.dumps(['BATTERY', battery, id])
+                            t = time.time()
                             client.publish('rpi', battery_json)
+                            write_mqtt_timestamp(timestamps_file, t, id, 'BATTERY')
                             
                             _, t_disp, sync_param = start_system(devices, a_file, drift_log_file, opt['fs'], channels, sensors, save_fmt, header)
                             system_started = True
                             print('The system is running again ...')
-                            client.publish('rpi', "['ACQUISITION ON']")
+
+                            id = random_str(6)
+                            t = time.time()
+                            client.publish('rpi', str(['ACQUISITION ON', id]))
+                            write_mqtt_timestamp(timestamps_file, t, id, 'ACQUISITION ON')
                             
                             t_display = process_data.decimate(t_disp, opt['fs'])
-                                        
-                            json_data = json.dumps(['DATA', t_display, channels, sensors])
+
+                            id = random_str(6)            
+                            json_data = json.dumps(['DATA', t_display, channels, sensors, id])
+                            t = time.time()
                             client.publish('rpi', json_data)
+                            write_mqtt_timestamp(timestamps_file, t, id, 'DATA')
+
                             already_timed_out = False
                             
                         except:
@@ -330,23 +400,31 @@ def main(devices):
         except KeyboardInterrupt:
             print('')
             print('You have stopped the acquistion. Saving all the files ...')
-            client.publish('rpi', "['STOPPED']")
+
+            id = random_str(6)
+            t = time.time()
+            client.publish('rpi', str(['STOPPED', id]))
+            write_mqtt_timestamp(timestamps_file, t, id, 'STOPPED')
+
             client.loop_stop()
             
             # Disconnect the system
-            disconnect_system(devices, service, a_file, annot_file, drift_log_file)
+            disconnect_system(devices, service, a_file, annot_file, drift_log_file, timestamps_file=timestamps_file)
             client.keepAlive == False
             pass
     
             
             # -----------------------------------------------------------------------------------------------------------------------------------------
         
-        print('')
-        client.publish('rpi', "['STOPPED']")
+        id = random_str(6)
+        t = time.time()
+        client.publish('rpi', str(['STOPPED', id]))
+        write_mqtt_timestamp(timestamps_file, t, id, 'STOPPED')
+
         client.loop_stop()
         
         # Disconnect the system
-        disconnect_system(devices, service, a_file, annot_file, drift_log_file)
+        disconnect_system(devices, service, a_file, annot_file, drift_log_file, timestamps_file=timestamps_file)
         system_started = False
         print('You have stopped the acquistion. Saving all the files ...')
         time.sleep(3)
@@ -356,11 +434,15 @@ def main(devices):
         
     except Exception as e:
         print(e)
-        client.publish('rpi', "['STOPPED']")
+        id = random_str(6)
+        t = time.time()
+        client.publish('rpi', str(['STOPPED', id]))
+        write_mqtt_timestamp(timestamps_file, t, id, 'STOPPED')
+
         client.loop_stop()
         
         # Disconnect the system
-        disconnect_system(devices, service, a_file, annot_file, drift_log_file)
+        disconnect_system(devices, service, a_file, annot_file, drift_log_file, timestamps_file=timestamps_file)
         system_started = False
         print('You have stopped the acquistion. Saving all the files ...')
         time.sleep(3)
