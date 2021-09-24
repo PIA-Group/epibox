@@ -329,7 +329,7 @@ def main(devices, startup_time):
                                         
                                         connected = False
                                         time.sleep(5)
-                                        connected, devices = connect_device(mac, client, devices, service)
+                                        connected, devices = connect_device(mac, client, devices, service, timestamps_file)
 
                                         if connected and mac in [d.macAddress for d in devices]:
                                             now = datetime.now()

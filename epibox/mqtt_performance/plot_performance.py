@@ -46,7 +46,8 @@ for startup_file in [f for f in os.listdir(directory) if 'startup' in f]:
 
     data_group = times.loc[times['key'] == 'DATA']
     labels_timestamps += [[data_group.iloc[0]['timestamp'], data_group.iloc[-1]['timestamp']]]
-    
+
+full_df.to_csv('full_df.csv')    
     
 max_latency = full_df['time'].max()
     
@@ -56,8 +57,8 @@ sns.lineplot(data=full_df, x='timestamp', y='time', hue='file', alpha=0.5)
 for label in labels_timestamps:
     plt.axvline(label[0], color='k')
     plt.text(label[0], max_latency, 'START', color='k')
-    plt.axvline(label[-1], color='tab:orange')
-    plt.text(label[-1], max_latency, 'END', color='tab:orange')
+    plt.axvline(label[-1], color='k')
+    plt.text(label[-1], max_latency, 'END', color='k')
 
 plt.xlabel('time since start [s]')
 plt.ylabel('latency [s]')
