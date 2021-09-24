@@ -54,8 +54,8 @@ plt.figure()
 sns.lineplot(data=full_df, x='timestamp', y='time', hue='file', alpha=0.5)
 
 for label in labels_timestamps:
-    plt.axvline(label[0], color='--k')
-    plt.text(label[0], max_latency, 'START', color='--k')
+    plt.axvline(label[0], color='k')
+    plt.text(label[0], max_latency, 'START', color='k')
     plt.axvline(label[-1], color='tab:orange')
     plt.text(label[-1], max_latency, 'END', color='tab:orange')
 
