@@ -95,7 +95,7 @@ def main(devices, startup_time):
         print('Successfully subcribed to topic', topic)
 
         global timestamps_file
-        timestamps_file = open_timestamps_file('/home/ana/Documents/epibox', 'run', save_time=startup_time)
+        timestamps_file,_ = open_timestamps_file('/home/ana/Documents/epibox', 'run', save_time=startup_time)
 
         id = random_str(6)
         t = time.time()
