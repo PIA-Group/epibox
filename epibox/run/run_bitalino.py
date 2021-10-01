@@ -227,6 +227,8 @@ def main(devices, startup_time):
                     already_notified_pause = False
                     
                     if not system_started:
+
+                        start_time = time.time()
                     
                         try:
                         
@@ -258,6 +260,9 @@ def main(devices, startup_time):
                     # Acquisition LOOP =========================================================================
                     # try to read from the device--------------------------------------------------------------------------------------------------
                     
+                    if time.time() - start_time > 5*60:
+                        client.keepAlive = False
+
                     if write_annot:
                         print('SAVED ANNOT')
                         write_annot_file(annot_file, new_annot)
@@ -329,7 +334,7 @@ def main(devices, startup_time):
                                         
                                         connected = False
                                         time.sleep(5)
-                                        connected, devices = connect_device(mac, client, devices, service)
+                                        connected, devices = connect_device(mac, client, devices, service, timestamps_file)
 
                                         if connected and mac in [d.macAddress for d in devices]:
                                             now = datetime.now()

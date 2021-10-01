@@ -11,7 +11,8 @@ def open_timestamps_file(directory, stage, save_time=None):
         now = datetime.now()
         save_time = now.strftime("%Y-%m-%d %H-%M-%S").rstrip('0')
 
-    a_file = open(os.path.join(directory, 'mqtt_timestamps_' + '{}_'.format(stage) + save_time + '.txt'), 'w')
+    #a_file = open(os.path.join(directory, 'mqtt_timestamps_' + '{}_'.format(stage) + save_time + '.txt'), 'w')
+    a_file = open(os.path.join(directory, 'mqtt_timestamps_{}_{}.txt'.format(stage, save_time)), 'w')
 
     return a_file, save_time
 
