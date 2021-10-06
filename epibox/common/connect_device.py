@@ -8,7 +8,6 @@ import bitalino
 
 # local
 from epibox.scientisst import scientisst
-from epibox.common.write_file import write_mqtt_timestamp
 
 def random_str(length):
 
@@ -16,7 +15,7 @@ def random_str(length):
     return ''.join(random.choice(letters) for i in range(length))
 
 
-def connect_device(macAddress, client, devices, service, timestamps_file):
+def connect_device(macAddress, client, devices, service):
     
     connected = False
     devices = [d for d in devices if d] # remove None
@@ -52,18 +51,11 @@ def connect_device(macAddress, client, devices, service, timestamps_file):
 
     devices = [d for d in devices if d] # remove None
     
-#     time.sleep(2)
-
-    id = random_str(6)
 
     if not connected or macAddress not in [d.macAddress for d in devices]:
-        t = time.time()
-        client.publish(topic='rpi', qos=2, payload="['MAC STATE', '{}', '{}', '{}']".format(macAddress, 'failed', id))
-        write_mqtt_timestamp(timestamps_file, t, id, 'MAC STATE')
+        client.publish(topic='rpi', qos=2, payload="['MAC STATE', '{}', '{}']".format(macAddress, 'failed'))
 
     else:
-        t = time.time()
-        client.publish(topic='rpi', qos=2, payload="['MAC STATE', '{}', '{}', '{}']".format(macAddress, 'connected', id))
-        write_mqtt_timestamp(timestamps_file, t, id, 'MAC STATE')
+        client.publish(topic='rpi', qos=2, payload="['MAC STATE', '{}', '{}']".format(macAddress, 'connected'))
     
     return connected, devices

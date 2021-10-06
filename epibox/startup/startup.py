@@ -14,8 +14,6 @@ import paho.mqtt.client as mqtt
 
 # local
 from epibox.common.connect_device import connect_device
-from epibox.common.open_file import open_timestamps_file
-from epibox.common.write_file import write_mqtt_timestamp
 from epibox.run import run_bitalino
 from epibox.run import run_scientisst
 
@@ -27,17 +25,10 @@ def on_message(client, userdata, message):
 
     global sys_args
     global devices
-    global timestamps_file
 
     message = str(message.payload.decode("utf-8"))
     print(message)
     message = ast.literal_eval(message)
-
-    # save timestamps for performance testing
-    t = time.time()
-    if message[0] in ['DEFAULT MAC', 'MAC STATE', 'DRIVES', 'DEFAULT CONFIG', 'TURNED OFF']:
-        t = time.time()
-        write_mqtt_timestamp(timestamps_file, t, message[-1], message[0])
     
 
     if message == ['Send default']:
@@ -54,12 +45,9 @@ def on_message(client, userdata, message):
         except Exception as e:
             listMAC = {"MAC1": "", "MAC2": ""}
 
-        id = random_str(6)
-        listMAC2 = json.dumps(['DEFAULT MAC','{}'.format(list(listMAC.values())[0]),'{}'.format(list(listMAC.values())[1]),id])
+        listMAC2 = json.dumps(['DEFAULT MAC','{}'.format(list(listMAC.values())[0]),'{}'.format(list(listMAC.values())[1])])
         
-        t = time.time()
         client.publish(topic='rpi', qos=2, payload=listMAC2)
-        write_mqtt_timestamp(timestamps_file, t, id, 'DEFAULT MAC')
 
         ######## Available drives ########
 
@@ -72,12 +60,9 @@ def on_message(client, userdata, message):
 
         total, _ , free = shutil.disk_usage('/')
 
-        id = random_str(6)
-        listDrives += ['RPi ({:.1f}% livre)'.format((free/total)*100), id]
+        listDrives += ['RPi ({:.1f}% livre)'.format((free/total)*100)]
 
-        t = time.time()
         client.publish(topic='rpi', qos=2, payload="{}".format(listDrives))
-        write_mqtt_timestamp(timestamps_file, t, id, 'DRIVES')
 
         
         ######## Default configurations ########
@@ -90,12 +75,9 @@ def on_message(client, userdata, message):
         except Exception as e:
             defaults = {"initial_dir": "", 'fs': 1000, 'channels': [], 'saveRaw': 'true', 'devices_mac': [], 'patient_id': 'default', 'service': 'Bitalino'}
 
-        id = random_str(6)
-        config = json.dumps(['DEFAULT CONFIG', defaults, id])
+        config = json.dumps(['DEFAULT CONFIG', defaults])
         
-        t = time.time()
         client.publish(topic='rpi', qos=2, payload=config)
-        write_mqtt_timestamp(timestamps_file, t, id, 'DEFAULT CONFIG')
 
 
     ######## New default configuration ########
@@ -146,7 +128,7 @@ def on_message(client, userdata, message):
         if mac != ' ' and mac != '' and message[1] not in sys_args['devices_mac']:
             sys_args['devices_mac'] += [mac]
 
-        _, devices = connect_device(mac, client, devices, service, timestamps_file)
+        _, devices = connect_device(mac, client, devices, service)
 
 
     ####### Set configurations ########
@@ -193,10 +175,7 @@ def on_message(client, userdata, message):
     elif message[0] == 'TURN OFF':
         print('TURNING OFF RPI')
 
-        id = random_str(6)
-        t = time.time()
-        client.publish(topic='rpi', qos=2, payload=str(['TURNED OFF', id]))
-        write_mqtt_timestamp(timestamps_file, t, id, 'TURNED OFF')
+        client.publish(topic='rpi', qos=2, payload=str(['TURNED OFF']))
         
 
     elif message[0] == 'TURNED OFF':
@@ -214,9 +193,6 @@ def main():
 
     global sys_args
     sys_args = {'initial_dir': None, 'fs': None, 'channels': None, 'saveRaw': None, 'devices_mac': [], 'patient_id': None, 'service': None}
-
-    global timestamps_file
-    timestamps_file, startup_time = open_timestamps_file('/home/ana/Documents/epibox', 'startup')
 
     client_name = random_str(6)
     print('Client name (startup):', client_name)
@@ -240,7 +216,6 @@ def main():
             continue
 
         else:
-            timestamps_file.close()
 
             client.loop_stop()
 
