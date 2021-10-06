@@ -1,9 +1,10 @@
 import numpy as np
 
+
 def write_file(t, a_file, drift_log_file, sync_param, time, fmt):
     write_acq_file(a_file, t, time, fmt)
     write_drift_log(drift_log_file, sync_param)
-    
+
 
 def write_acq_file(a_file, t, time, fmt):
 	np.savetxt(a_file, t, fmt=fmt, delimiter='	', newline='\n', header='', footer='', comments ='')
@@ -26,4 +27,7 @@ def write_annot_file(annot_file, annot):
     with open(annot_file, 'a') as file:
         file.write('{}	{}\n'.format(annot[0], annot[1]))
     
-        
+
+def write_mqtt_timestamp(a_file, timestamp, mqtt_id, mqtt_key):
+
+    np.savetxt(a_file, [[timestamp, mqtt_id, mqtt_key]], fmt='%s, %s, %s', delimiter=', ', newline='\n', header='', footer='', comments='')
