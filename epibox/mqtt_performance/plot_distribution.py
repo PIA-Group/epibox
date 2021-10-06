@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 from matplotlib.cbook import boxplot_stats
 
 
-directory = '/home/ana/Documents/epibox/100rss_test_channels'
-# directory = '/home/ana/Documents/epibox/12channels_test_rss'
+# directory = '/home/ana/Documents/epibox/48rss_test_channels'
+directory = '/home/ana/Documents/epibox/6channels_test_rss'
 configuration = os.path.basename(directory)
 
 # median_file = open(
@@ -73,10 +73,14 @@ labels = ax.get_xticklabels()
 if 'test_channels' in directory:
     ax.set_xticklabels(['1 channel', '6 channels', '12 channels'])
     plt.xlabel('# of channels')
+    plt.title('Experimental setup: {}% RSS'.format(configuration.split('_')[0][:-3]))
 
 elif 'test_rss' in directory:
     ax.set_xticklabels(['100%', '80%', '48%'])
     plt.xlabel('RSS')
+    if 'channels' in configuration: tlt = configuration.split('_')[0][:-8] + ' channels'
+    else: tlt = '1 channel'
+    plt.title('Experimental setup: {}'.format(tlt))
 
 plt.savefig(
     os.path.join(
