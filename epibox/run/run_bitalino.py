@@ -69,7 +69,7 @@ def on_message(client, userdata, message):
 # ****************************** MAIN SCRIPT ***********************************
 
 
-def main(devices, startup_time):
+def main(devices):
 
     try:
 

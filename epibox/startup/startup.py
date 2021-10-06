@@ -229,7 +229,7 @@ def main():
                 json.dump(sys_args, json_file)
 
             if sys_args['service'] == 'Bitalino' or sys_args['service'] == 'Mini':
-                run_bitalino.main(devices, startup_time)
+                run_bitalino.main(devices)
             else:
                 run_scientisst.main(devices)
 
