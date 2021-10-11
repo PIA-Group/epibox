@@ -31,7 +31,6 @@ def run_system(devices, a_file, annot_file, drift_log_file, sync_param, director
     
     now = datetime.now()
     sync_param['sync_time'] = now.strftime("%Y-%m-%d %H:%M:%S.%f")
-    print('just before read_modules')
     t, t_str, t_display = read_modules(devices, mac_channels, sensors, header)
 
     
@@ -45,7 +44,7 @@ def run_system(devices, a_file, annot_file, drift_log_file, sync_param, director
     sys.stdout.write("\rElapsed time (seconds): % i " % i)
     sys.stdout.flush()
     
-    print('in run system: {}'.format(t))
+    #print('in run system: {}'.format(t))
     try:
         write_file(t, a_file, drift_log_file, sync_param, str(i), save_fmt)
         

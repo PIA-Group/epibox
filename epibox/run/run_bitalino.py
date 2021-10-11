@@ -42,6 +42,7 @@ def on_message(client, userdata, message):
         startup.main()
 
     elif message[0] == 'INTERRUPT':
+
         client.keepAlive = False
 
     elif message[0] == 'PAUSE ACQ':
@@ -109,7 +110,7 @@ def main(devices):
             channels = []
             sensors = []
             for triplet in opt['channels']:
-                channels += [triplet[:2] + [1]] # added the 0 here
+                channels += [triplet[:2] + [0]] # added the 0 here
                 sensors += [triplet[2]]
 
         saveRaw = bool(opt['saveRaw'])
@@ -125,6 +126,7 @@ def main(devices):
         system_started = False
 
         t_buffer = [[]] * len(channels)
+        strength_flag = [0] * len(channels)
 
         print('ID: {}'.format(opt['patient_id']))
         print('folder: {}'.format(opt['initial_dir']))
@@ -136,6 +138,7 @@ def main(devices):
         print('service: {}'.format(service))
         print('Devices in list: {}'.format([d.macAddress for d in devices]))
 
+        t_all = []
 
         # Use/create the patient folder ===============================================================
         directory = create_folder(opt['initial_dir'], '{}'.format(opt['patient_id']), service)
@@ -176,8 +179,6 @@ def main(devices):
             battery_json = json.dumps(['BATTERY', battery])
             client.publish('rpi', battery_json)
 
-        t_aux = time.time()
-        a = 0
         # Starting Acquisition LOOP =========================================================================
         try:
             while client.keepAlive == True:
@@ -248,22 +249,18 @@ def main(devices):
                         _, t_disp, a_file, drift_log_file, sync_param = run_system(devices, a_file, annot_file, drift_log_file, sync_param, directory, channels, sensors, opt['fs'], save_fmt, header)
 
                         t_display = process_data.decimate(t_disp, opt['fs'])
+                        t_all += t_display[0]
 
-                        # nbuffer = 30
-                        # if len(t_buffer[0]) >= nbuffer:
-                        #     t_buffer = [tb_aux[-(nbuffer-len(t_display[0])):] + t_display[tb] for tb,tb_aux in enumerate(t_buffer)]
-                        #     detect_event(t_buffer, sensors)
+                        nbuffer = 30
+                        if len(t_buffer[0]) >= nbuffer:
+                            t_buffer = [tb_aux[-(nbuffer-len(t_display[0])):] + t_display[tb] for tb,tb_aux in enumerate(t_buffer)]
+                            strength_flag = detect_event(t_buffer, sensors)
                         
-                        # else:
-                        #     t_buffer = [tb_aux + t_display[tb] for tb,tb_aux in enumerate(t_buffer)]
-
-                        if t_aux - time.time() >= 4:
-                            if a==0: a = 1
-                            else: a = 0
-
-                            t_aux = time.time()
+                        else:
+                            t_buffer = [tb_aux + t_display[tb] for tb,tb_aux in enumerate(t_buffer)]
                         
-                        channels = [chn[:2]+[a] for chn in channels]
+                        channels = [chn[:2]+[strength_flag[c]] for c, chn in enumerate(channels)]
+                        print(channels)
 
                         json_data = json.dumps(['DATA', t_display, channels, sensors])
                         client.publish('rpi', json_data)
@@ -411,6 +408,7 @@ def main(devices):
         client.publish('rpi', str(['STOPPED']))
 
         client.loop_stop()
+
 
         # Disconnect the system
         disconnect_system(devices, service, a_file, annot_file, drift_log_file)

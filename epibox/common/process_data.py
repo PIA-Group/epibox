@@ -48,7 +48,7 @@ def decimate(t, fs):
 #                 pass
         if fs >= 1000:
             t_aux = signal.decimate(t_aux, 10)
-        
+            
         t_display += [t_aux.tolist()]
 
 
