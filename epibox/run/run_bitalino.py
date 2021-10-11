@@ -231,8 +231,8 @@ def main(devices):
                     # Acquisition LOOP =========================================================================
                     # try to read from the device--------------------------------------------------------------------------------------------------
 
-                    if time.time() - start_time > 5*60:
-                        client.keepAlive = False
+                    # if time.time() - start_time > 5*60:
+                    #     client.keepAlive = False
 
                     if write_annot:
                         print('SAVED ANNOT')
