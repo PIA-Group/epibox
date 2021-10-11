@@ -176,7 +176,8 @@ def main(devices):
             battery_json = json.dumps(['BATTERY', battery])
             client.publish('rpi', battery_json)
 
-
+        t_aux = time.time()
+        a = 0
         # Starting Acquisition LOOP =========================================================================
         try:
             while client.keepAlive == True:
@@ -256,7 +257,13 @@ def main(devices):
                         # else:
                         #     t_buffer = [tb_aux + t_display[tb] for tb,tb_aux in enumerate(t_buffer)]
 
-                        # channels = [chn[:2]+[0] for chn in channels]
+                        if t_aux - time.time() >= 4:
+                            if a==0: a = 1
+                            else: a = 0
+
+                            t_aux = time.time()
+                        
+                        channels = [chn[:2]+[a] for chn in channels]
 
                         json_data = json.dumps(['DATA', t_display, channels, sensors])
                         client.publish('rpi', json_data)
