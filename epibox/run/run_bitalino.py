@@ -12,7 +12,7 @@ import os
 # third-party
 import numpy as np
 import paho.mqtt.client as mqtt
-from epibox.common.pzt_detection import detect_apnea
+from epibox.common.emg_detection import detect_event
 
 # local
 from epibox.startup import startup
@@ -109,7 +109,7 @@ def main(devices):
             channels = []
             sensors = []
             for triplet in opt['channels']:
-                channels += [triplet[:2] + [0]] # added the 0 here
+                channels += [triplet[:2] + [1]] # added the 0 here
                 sensors += [triplet[2]]
 
         saveRaw = bool(opt['saveRaw'])
@@ -251,7 +251,7 @@ def main(devices):
                         # nbuffer = 30
                         # if len(t_buffer[0]) >= nbuffer:
                         #     t_buffer = [tb_aux[-(nbuffer-len(t_display[0])):] + t_display[tb] for tb,tb_aux in enumerate(t_buffer)]
-                        #     detect_apnea(t_buffer, sensors)
+                        #     detect_event(t_buffer, sensors)
                         
                         # else:
                         #     t_buffer = [tb_aux + t_display[tb] for tb,tb_aux in enumerate(t_buffer)]

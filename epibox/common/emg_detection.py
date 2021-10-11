@@ -1,6 +1,6 @@
 import numpy as np
 
-def detect_apnea(t, sensors):
+def detect_event(t, sensors):
 
     for i,chn in enumerate(t):
         
