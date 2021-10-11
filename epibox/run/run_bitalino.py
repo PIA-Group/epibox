@@ -10,7 +10,9 @@ import pwd
 import os
 
 # third-party
+import numpy as np
 import paho.mqtt.client as mqtt
+from epibox.common.pzt_detection import detect_apnea
 
 # local
 from epibox.startup import startup
@@ -33,7 +35,7 @@ def on_message(client, userdata, message):
 
     message = str(message.payload.decode("utf-8"))
     message = ast.literal_eval(message)
-    print("message received: ", message)
+    #print("message received: ", message)
 
     if message[0] == 'RESTART':
         client.loop_stop()
@@ -100,14 +102,14 @@ def main(devices):
             channels = []
             for device in opt['devices_mac']:
                 for i in range(1, 7):
-                    channels += [[device, str(i)]]
+                    channels += [[device, str(i), 0]]
             sensors = ['-' for i in range(len(channels))]
 
         else:
             channels = []
             sensors = []
             for triplet in opt['channels']:
-                channels += [triplet[:2]]
+                channels += [triplet[:2] + [0]] # added the 0 here
                 sensors += [triplet[2]]
 
         saveRaw = bool(opt['saveRaw'])
@@ -121,6 +123,8 @@ def main(devices):
         pause_acq = False
         already_notified_pause = False
         system_started = False
+
+        t_buffer = [[]] * len(channels)
 
         print('ID: {}'.format(opt['patient_id']))
         print('folder: {}'.format(opt['initial_dir']))
@@ -243,6 +247,16 @@ def main(devices):
                         _, t_disp, a_file, drift_log_file, sync_param = run_system(devices, a_file, annot_file, drift_log_file, sync_param, directory, channels, sensors, opt['fs'], save_fmt, header)
 
                         t_display = process_data.decimate(t_disp, opt['fs'])
+
+                        # nbuffer = 30
+                        # if len(t_buffer[0]) >= nbuffer:
+                        #     t_buffer = [tb_aux[-(nbuffer-len(t_display[0])):] + t_display[tb] for tb,tb_aux in enumerate(t_buffer)]
+                        #     detect_apnea(t_buffer, sensors)
+                        
+                        # else:
+                        #     t_buffer = [tb_aux + t_display[tb] for tb,tb_aux in enumerate(t_buffer)]
+
+                        # channels = [chn[:2]+[0] for chn in channels]
 
                         json_data = json.dumps(['DATA', t_display, channels, sensors])
                         client.publish('rpi', json_data)
