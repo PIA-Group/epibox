@@ -1,8 +1,9 @@
 # EpiBOX, the Python package
+## A Research Tool to Stimulate Collaboration Within Biosignal Collection
 
 EpiBOX was developed as a way to enable researchers to escalate their data collection process by leveraging the human resources available. By providing a versatile, discreet, user-friendly and open-source system, operated through a mobile application, we hope to provide a collaboration tool for the acquisition of biosignals.
 
-Designed for use with a Raspberry Pi due to its unobtrusive design (but usable with any Linux device), it acts as an autonomous recording unit - allowing for sensor connectivity and data storage. EpiBOX mobile app provides the user interaface and the near-real time visualization of the data. 
+Designed for use with a Raspberry Pi due to its unobtrusive design (but usable with any Linux device), it acts as an autonomous recording unit - allowing for sensor connectivity and data storage. EpiBOX mobile app provides the user interface and the near-real time visualization of the data. 
 
 Currently, EpiBOX supports BITalino-based equipments allowing for the recording, storage and visualization of up to 12 channels simmultaneously. Nevertheless, this package can be easily integrated with other sensors, as long as a Python API is provided!
 
@@ -48,7 +49,7 @@ Why BITalino:
 Why Raspberry Pi:
  - Discreteness
  - Affordability 
- - Ease of system replication - through shell script or Docker (soon!)
+ - Ease of system replication - through shell script or RPi imager
  - Computational and storage power
 
 Get to know our project @ [LinkedIn - PreEpiSeizures](https://www.linkedin.com/feed/update/urn:li:activity:6787017108631941120/)
