@@ -37,7 +37,7 @@ python -m epibox
 - Real-time visualization of up-to 12 channels
 - In-acquisition annotations
 
-![](intro-gif.gif) ![](config-gif.gif) ![](visualize-gif.gif)
+![](intro-resized.gif) ![](conf-resized.gif) ![](acquisition-resized.gif)
 
 ## Additional Resources
 
