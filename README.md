@@ -1,4 +1,4 @@
-# EpiBOX
+# EpiBOX, the Python package
 
 EpiBOX was developed as a way to enable researchers to escalate their data collection process by leveraging the human resources available. By providing a versatile, discreet, user-friendly and open-source system, operated through a mobile application, we hope to provide a collaboration tool for the acquisition of biosignals.
 
@@ -28,9 +28,38 @@ pip install --upgrade epibox
 python -m epibox
 ```
 
-## Other info
-* Licence [MIT](https://choosealicense.com/licenses/mit/)
-* Documentation: https://epibox.readthedocs.io.
+## Features
+
+- Step-by-step interactions to start the acquisition
+- History of acquisition devices
+- Default configurations for optimized interaction
+- Real-time visualization of up-to 12 channels
+- In-acquisition annotations
+
+![](intro-gif.gif) ![](config-gif.gif) ![](visualize-gif.gif)
+
+## Additional Resources
+
+Why BITalino: 
+ - Versatility of sensors & flexibility of wearable form-factors
+ - Rapid & cheap prototyping
+ - Peer-validated against gold-standards
+
+Why Raspberry Pi:
+ - Discreteness
+ - Affordability 
+ - Ease of system replication - through shell script or Docker (soon!)
+ - Computational and storage power
+
+Get to know our project @ [LinkedIn - PreEpiSeizures](https://www.linkedin.com/feed/update/urn:li:activity:6787017108631941120/)
+
+
+
+## License
+
+MIT
 
 ## Contact
-For any additional information please contact me: anascacais@gmail.com
+
+For any additional information about the mobile app or our project please contact me: anascacais@gmail.com
+
