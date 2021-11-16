@@ -15,7 +15,6 @@ import paho.mqtt.client as mqtt
 # local
 from epibox.common.connect_device import connect_device
 from epibox.run import run_bitalino
-from epibox.run import run_scientisst
 
 def random_str(length):
     letters = string.ascii_letters
@@ -228,10 +227,7 @@ def main():
             with open('/home/{}/Documents/epibox/args.json'.format(username), 'w+') as json_file:
                 json.dump(sys_args, json_file)
 
-            if sys_args['service'] == 'Bitalino' or sys_args['service'] == 'Mini':
-                run_bitalino.main(devices)
-            else:
-                run_scientisst.main(devices)
+            run_bitalino.main(devices)
 
     except Exception as e:
         print(e)

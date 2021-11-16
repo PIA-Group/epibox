@@ -6,10 +6,7 @@ def disconnect_system(devices, service, a_file=None, annot_file=None, drift_log_
     for device in devices:
         try:
             device.stop()
-            if service == 'Bitalino' or service == 'Mini':
-                device.close()
-            else:
-                device.disconnect()
+            device.close()
                 
         except:
             continue

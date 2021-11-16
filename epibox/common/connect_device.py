@@ -6,9 +6,6 @@ import random
 # third-party
 import bitalino
 
-# local
-from epibox.scientisst import scientisst
-
 def random_str(length):
 
     letters = string.ascii_letters
@@ -32,18 +29,13 @@ def connect_device(macAddress, client, devices, service):
     
     else:
 
-        if service == 'Bitalino' or service == 'Mini':
-            try: 
-                device = bitalino.BITalino(macAddress, timeout=5)
-                devices += [device]
-            except Exception as e:
-                print(e)
-        else:
-            try:
-                device = scientisst.ScientISST(macAddress)
-                devices += [device]
-            except Exception as e:
-                print(e)
+        
+        try: 
+            device = bitalino.BITalino(macAddress, timeout=5)
+            devices += [device]
+        except Exception as e:
+            print(e)
+        
                                 
         if macAddress in [d.macAddress for d in devices]:
             connected = True
