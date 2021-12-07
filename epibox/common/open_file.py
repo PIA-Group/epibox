@@ -5,7 +5,7 @@ import os
 # local
 from epibox.bit.header2bitalino import header2bitalino
 
-def open_file(directory, devices, mac_channels, sensors, fs, saveRaw, service):
+def open_file(directory, devices, mac_channels, sensors, fs, save_raw, service):
 
     # for txt format
     now = datetime.now()
@@ -23,7 +23,7 @@ def open_file(directory, devices, mac_channels, sensors, fs, saveRaw, service):
     a_file = open(os.path.join(directory, 'A' + save_time + '.txt'), 'w') #data file
     
     
-    save_fmt, header = header2bitalino(a_file, file_time, file_date, devices, mac_channels, sensors, fs, saveRaw, service)
+    save_fmt, header = header2bitalino(a_file, file_time, file_date, devices, mac_channels, sensors, fs, save_raw, service)
     
     
     drift_log_file = open(os.path.join(directory, 'drift_log_file_'+ save_time +'.txt'), 'w')

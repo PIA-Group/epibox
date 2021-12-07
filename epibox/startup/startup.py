@@ -7,7 +7,6 @@ import subprocess
 import json
 import shutil
 import pwd
-import time
 
 # third-party
 import paho.mqtt.client as mqtt
@@ -40,7 +39,6 @@ def on_message(client, userdata, message):
             with open('/home/{}/Documents/epibox/listMAC.json'.format(username), 'r') as json_file:
                 listMAC = json_file.read()
                 listMAC = ast.literal_eval(listMAC)
-
         except Exception as e:
             listMAC = {"MAC1": "", "MAC2": ""}
 
@@ -59,7 +57,7 @@ def on_message(client, userdata, message):
 
         total, _ , free = shutil.disk_usage('/')
 
-        listDrives += ['RPi ({:.1f}% livre)'.format((free/total)*100)]
+        listDrives += ['EpiBOX Core ({:.1f}% livre)'.format((free/total)*100)]
 
         client.publish(topic='rpi', qos=2, payload="{}".format(listDrives))
 
@@ -70,9 +68,8 @@ def on_message(client, userdata, message):
             with open('/home/{}/Documents/epibox/config_default.json'.format(username), 'r') as json_file:
                 defaults = json_file.read()
                 defaults = ast.literal_eval(defaults)
-
         except Exception as e:
-            defaults = {"initial_dir": "", 'fs': 1000, 'channels': [], 'saveRaw': 'true', 'devices_mac': [], 'patient_id': 'default', 'service': 'Bitalino'}
+            defaults = {'initial_dir': 'EpiBOX Core', 'fs': 1000, 'channels': [], 'save_raw': 'true', 'service': 'Bitalino'}
 
         config = json.dumps(['DEFAULT CONFIG', defaults])
         
@@ -84,28 +81,16 @@ def on_message(client, userdata, message):
     elif message[0] == 'NEW CONFIG DEFAULT':
         username = pwd.getpwuid(os.getuid())[0]
 
-        config = message[1]
-        defaults = {'initial_dir': config[0], 'fs': config[1], 'channels': config[2], 'saveRaw': config[3]}
-
-        if not os.path.exists('/home/{}/Documents/epibox'.format(username)):
-            oldmask = os.umask(000)
-            os.makedirs('/home/{}/Documents/epibox'.format(username), mode=0o777)
-            os.umask(oldmask)
-
+        defaults = message[1]
+        
         with open('/home/{}/Documents/epibox/config_default.json'.format(username), 'w+') as json_file:
             json.dump(defaults, json_file)
 
-            
-
+        
     elif message[0] == 'NEW MAC':
         username = pwd.getpwuid(os.getuid())[0]
 
         listMAC = message[1]
-
-        if not os.path.exists('/home/{}/Documents/epibox'.format(username)):
-            oldmask = os.umask(000)
-            os.makedirs('/home/{}/Documents/epibox'.format(username), mode=0o777)
-            os.umask(oldmask)
 
         with open('/home/{}/Documents/epibox/listMAC.json'.format(username), 'w+') as json_file:
             json.dump(listMAC, json_file)
@@ -135,9 +120,8 @@ def on_message(client, userdata, message):
     elif message[0] == 'FOLDER':
         username = pwd.getpwuid(os.getuid())[0]
 
-        if message[1] == 'RPi':
+        if message[1] == 'EpiBOX Core':
             folder = '/home/{}/Documents/epibox/acquisitions'.format(username)
-
         else: 
             folder = '/media/{}/'.format(username) + message[1] + '/acquisitions'
 
@@ -150,8 +134,8 @@ def on_message(client, userdata, message):
 
     
     elif message[0] == 'SAVE RAW':
-        saveRaw = message[1]
-        sys_args['saveRaw'] = saveRaw
+        save_raw = message[1]
+        sys_args['save_raw'] = save_raw
 
 
     elif message[0] == 'EPI SERVICE':
@@ -191,7 +175,7 @@ def main():
     devices = []
 
     global sys_args
-    sys_args = {'initial_dir': None, 'fs': None, 'channels': None, 'saveRaw': None, 'devices_mac': [], 'patient_id': None, 'service': None}
+    sys_args = {'initial_dir': None, 'fs': None, 'channels': None, 'save_raw': None, 'devices_mac': [], 'patient_id': None, 'service': None}
 
     client_name = random_str(6)
     print('Client name (startup):', client_name)
@@ -211,18 +195,18 @@ def main():
 
         print('Successfully subcribed to topic', topic)
 
+        username = pwd.getpwuid(os.getuid())[0]
+        if not os.path.exists('/home/{}/Documents/epibox'.format(username)):
+            oldmask = os.umask(000)
+            os.makedirs('/home/{}/Documents/epibox'.format(username), mode=0o777)
+            os.umask(oldmask)
+
         while client.keepAlive == True:
             continue
 
         else:
 
             client.loop_stop()
-
-            username = pwd.getpwuid(os.getuid())[0]
-            if not os.path.exists('/home/{}/Documents/epibox'.format(username)):
-                oldmask = os.umask(000)
-                os.makedirs('/home/{}/Documents/epibox'.format(username), mode=0o777)
-                os.umask(oldmask)
 
             with open('/home/{}/Documents/epibox/args.json'.format(username), 'w+') as json_file:
                 json.dump(sys_args, json_file)

@@ -1,6 +1,6 @@
 
 
-def header2bitalino(filename, file_time, file_date, devices, mac_channels, sensors, fs, saveRaw, service):
+def header2bitalino(filename, file_time, file_date, devices, mac_channels, sensors, fs, save_raw, service):
     
     filename.write('# OpenSignals Text File Format' + '\n')
     
@@ -17,7 +17,7 @@ def header2bitalino(filename, file_time, file_date, devices, mac_channels, senso
         for i,elem in enumerate(mac_channels):
             if elem[0]==device.macAddress:
                 mac_dict[device.macAddress]['sensor'] += [sensors[i]]
-                if saveRaw:
+                if save_raw:
                     fmt += ['%i']
                 else:
                     fmt += ['%.2f']
@@ -46,7 +46,7 @@ def header2bitalino(filename, file_time, file_date, devices, mac_channels, senso
         
         mac_dict[device.macAddress]['sampling rate'] = fs
         
-        if saveRaw:
+        if save_raw:
             mac_dict[device.macAddress]['label'] = ['RAW' for i,elem in enumerate(mac_channels) if elem[0]==device.macAddress]
         else:
             mac_dict[device.macAddress]['label'] = [sensors[i] for i,elem in enumerate(mac_channels) if elem[0]==device.macAddress]
@@ -56,7 +56,7 @@ def header2bitalino(filename, file_time, file_date, devices, mac_channels, senso
         mac_dict[device.macAddress]['resolution'] = [4] + [aux[i] for i in range(len(aux2))]
         resolution[device.macAddress] = mac_dict[device.macAddress]['resolution']
 
-    header = {'resolution': resolution, 'saveRaw': saveRaw, 'service': service}
+    header = {'resolution': resolution, 'save_raw': save_raw, 'service': service}
     
     print("# " + str(mac_dict) + '\n')
     filename.write("# " + str(mac_dict) + '\n')

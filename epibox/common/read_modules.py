@@ -49,7 +49,7 @@ def read_modules(devices, mac_channels, sensors, header):
 
             if chn[0] == device.macAddress:
 
-                if header['saveRaw']:
+                if header['save_raw']:
                     signal_type = 'RAW'
 
                 else:

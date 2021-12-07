@@ -113,7 +113,7 @@ def main(devices):
                 channels += [triplet[:2] + [0]] # added the 0 here
                 sensors += [triplet[2]]
 
-        saveRaw = bool(opt['saveRaw'])
+        save_raw = bool(opt['save_raw'])
         service = opt['service']
 
         global write_annot
@@ -131,7 +131,7 @@ def main(devices):
         print('ID: {}'.format(opt['patient_id']))
         print('folder: {}'.format(opt['initial_dir']))
         print('fs: {}'.format(opt['fs']))
-        print('saveRaw: {}'.format(saveRaw))
+        print('save_raw: {}'.format(save_raw))
         print('channels: {}'.format(channels))
         print('devices: {}'.format(opt['devices_mac']))
         print('sensors: {}'.format(sensors))
@@ -145,7 +145,7 @@ def main(devices):
         already_timed_out = False
 
         try:
-            a_file, annot_file, drift_log_file, save_fmt, header = open_file(directory, devices, channels, sensors, opt['fs'], saveRaw, service)
+            a_file, annot_file, drift_log_file, save_fmt, header = open_file(directory, devices, channels, sensors, opt['fs'], save_raw, service)
 
         except Exception as e:
             print(e)
@@ -338,7 +338,7 @@ def main(devices):
 
                             print('Devices in list: {}'.format([d.macAddress for d in devices]))
 
-                            a_file, annot_file, drift_log_file, save_fmt, header = open_file(directory, devices, channels, sensors, opt['fs'], saveRaw, service)
+                            a_file, annot_file, drift_log_file, save_fmt, header = open_file(directory, devices, channels, sensors, opt['fs'], save_raw, service)
 
                             # Acquisition LOOP =========================================================================
 
