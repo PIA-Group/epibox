@@ -1,5 +1,4 @@
 # built-in
-import time
 import string 
 import random
 
@@ -12,7 +11,7 @@ def random_str(length):
     return ''.join(random.choice(letters) for i in range(length))
 
 
-def connect_device(macAddress, client, devices, service):
+def connect_device(macAddress, client, devices):
     
     connected = False
     devices = [d for d in devices if d] # remove None

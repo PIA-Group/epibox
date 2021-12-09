@@ -112,7 +112,7 @@ def on_message(client, userdata, message):
         if mac != ' ' and mac != '' and message[1] not in sys_args['devices_mac']:
             sys_args['devices_mac'] += [mac]
 
-        _, devices = connect_device(mac, client, devices, service)
+        _, devices = connect_device(mac, client, devices)
 
 
     ####### Set configurations ########

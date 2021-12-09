@@ -63,4 +63,3 @@ MIT
 ## Contact
 
 For any additional information about the mobile app or our project please contact me: anascacais@gmail.com
-

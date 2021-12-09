@@ -44,7 +44,6 @@ def run_system(devices, a_file, annot_file, drift_log_file, sync_param, director
     sys.stdout.write("\rElapsed time (seconds): % i " % i)
     sys.stdout.flush()
     
-    #print('in run system: {}'.format(t))
     try:
         write_file(t, a_file, drift_log_file, sync_param, str(i), save_fmt)
         
