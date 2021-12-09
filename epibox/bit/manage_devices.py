@@ -5,7 +5,6 @@ import json
 
 # third-party
 import numpy as np
-from epibox.common.write_file import write_annot_file
 
 # local
 from epibox.exceptions.exception_manager import error_kill
@@ -41,44 +40,49 @@ def start_devices(client, devices, fs, mac_channels, header):
     return sync_param
 
 
-def reconnect_devices(client, opt, already_timed_out, a_file, annot_file, drift_log_file):
+def connect_devices(client, devices, opt, already_timed_out, a_file, annot_file, drift_log_file):
 
     for mac in opt['devices_mac']:
 
         init_connect_time = time.time()
         print('Searching for Module...' + mac)
 
-        while client.keepAlive == True:
+        i = 0
+        while client.keepAlive:
+
+            i += 1
 
             if (time.time() - init_connect_time) > 120:
                 error_kill(client, devices, 'Failed to reconnect to devices', a_file, annot_file, drift_log_file)
 
             try:
-                if already_timed_out and (time.time() - init_connect_time > 10):
-                    already_timed_out = False
-
+                
                 connected = False
-                time.sleep(5)
+                time.sleep(3)
                 connected, devices = connect_device(mac, client, devices)
 
                 if connected and mac in [d.macAddress for d in devices]:
                     now = datetime.now()
                     save_time = now.strftime("%H-%M-%S").rstrip('0')
-                    # TODO: change this to "client.newAnnot"...
-                    #write_annot_file(annot_file, ['reconnection', save_time])
+                    client.newAnnot = ['reconnection'], save_time
+                    print(f'{mac}: {connected}')
                     break
 
+                else:
+                    raise Exception
+
             except Exception as e:
-                print(e)
-                print('HERE Failed at connecting to BITalino')
 
-                if not already_timed_out and (time.time() - init_connect_time > 10):
-
+                if not already_timed_out and (time.time() - init_connect_time > 10*i):
                     timeout_json = json.dumps(['TIMEOUT', '{}'.format(mac)])
                     client.publish('rpi', timeout_json)
-
                     already_timed_out = True
-                    # init_connect_time = time.time()
+
+                continue
+
+    return devices
+
+
 
 def pause_devices(client, devices):
 

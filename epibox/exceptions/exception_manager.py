@@ -3,12 +3,8 @@ import subprocess
 import time
 from datetime import datetime
 
-# third-party
-import paho.mqtt.client as mqtt
-
 # local
 from epibox.common.disconnect_system import disconnect_system
-from epibox.common.write_file import write_annot_file
 
 
 def error_kill(client, devices, msg, mqtt_msg='ERROR', a_file=None, annot_file=None, drift_log_file=None, files_open=True):
@@ -33,7 +29,7 @@ def error_disconnect(client, devices, msg, a_file=None, annot_file=None, drift_l
     # Disconnect the system
     now = datetime.now()
     save_time = now.strftime("%H-%M-%S").rstrip('0')
-    write_annot_file(annot_file, ['disconnection', save_time])
+    client.newAnnot = ['disconnection', save_time]
 
     disconnect_system(devices, a_file, annot_file, drift_log_file, files_open)
     
