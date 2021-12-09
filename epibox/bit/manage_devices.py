@@ -40,7 +40,7 @@ def start_devices(client, devices, fs, mac_channels, header):
     return sync_param
 
 
-def connect_devices(client, devices, opt, already_timed_out, a_file, annot_file, drift_log_file):
+def connect_devices(client, devices, opt, already_timed_out, a_file=None, annot_file=None, drift_log_file=None, files_open=True):
 
     for mac in opt['devices_mac']:
 
@@ -53,7 +53,7 @@ def connect_devices(client, devices, opt, already_timed_out, a_file, annot_file,
             i += 1
 
             if (time.time() - init_connect_time) > 120:
-                error_kill(client, devices, 'Failed to reconnect to devices', a_file, annot_file, drift_log_file)
+                error_kill(client, devices, 'Failed to reconnect to devices', a_file, annot_file, drift_log_file, files_open)
 
             try:
                 
@@ -65,7 +65,6 @@ def connect_devices(client, devices, opt, already_timed_out, a_file, annot_file,
                     now = datetime.now()
                     save_time = now.strftime("%H-%M-%S").rstrip('0')
                     client.newAnnot = ['reconnection'], save_time
-                    print(f'{mac}: {connected}')
                     break
 
                 else:

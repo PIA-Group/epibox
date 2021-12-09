@@ -16,10 +16,11 @@ from epibox.bit.get_battery import get_battery
 # ****************************** MAIN SCRIPT ***********************************
 
 
-def main(devices):
+def main():
+
+    devices = []
 
     try:
-
         client = setup_client()
         opt, channels, sensors, service, save_raw = setup_config()
         t_all, already_notified_pause, system_started, files_open = setup_variables()
@@ -27,6 +28,8 @@ def main(devices):
         # Use/create the patient folder ===============================================================
         directory = create_folder(opt['initial_dir'], '{}'.format(opt['patient_id']), service)
         already_timed_out = False
+
+        devices = connect_devices(client, devices, opt, already_timed_out, files_open=False)
     
     except Exception as e:
         error_kill(client, devices, msg='Failed initial setup', files_open=False)
@@ -37,7 +40,6 @@ def main(devices):
 
     except Exception as e:
         error_kill(client, devices, msg='Failed to open the files', files_open=False)
-
 
 
     # Starting Acquisition LOOP =========================================================================

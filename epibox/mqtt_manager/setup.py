@@ -39,26 +39,27 @@ def setup_config():
     username = pwd.getpwuid(os.getuid())[0]
     with open('/home/{}/Documents/epibox/args.json'.format(username), 'r') as json_file:
         opt = json_file.read()
-
-    print(opt)
-    opt = ast.literal_eval(opt)
+        opt = ast.literal_eval(opt)
 
     if not opt['channels']:
         channels = []
-        for device in opt['devices_mac']:
+        for device in opt['devices_mac'].values():
             for i in range(1, 7):
-                channels += [[device, str(i), 0]]
+                channels += [[device, str(i)]]
         sensors = ['-' for i in range(len(channels))]
 
     else:
         channels = []
         sensors = []
         for triplet in opt['channels']:
-            channels += [triplet[:2] + [0]] # added the 0 here
+            
+            triplet[0] = opt['devices_mac'][triplet[0]] # replace MAC ID for corresponding MAC
+            channels += [triplet[:2]]
             sensors += [triplet[2]]
 
     save_raw = bool(opt['save_raw'])
     service = opt['service']
+    opt['devices_mac'] = [m for m in opt['devices_mac'].values() if m != '']
 
     print('ID: {}'.format(opt['patient_id']))
     print('folder: {}'.format(opt['initial_dir']))
