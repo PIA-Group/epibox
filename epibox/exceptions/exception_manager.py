@@ -15,6 +15,7 @@ def error_kill(client, devices, msg, mqtt_msg='ERROR', a_file=None, annot_file=N
 
     # Disconnect the system
     disconnect_system(devices, a_file, annot_file, drift_log_file, files_open)
+    
 
     pid = subprocess.run(['sudo', 'pgrep', 'python'], capture_output=True, text=True).stdout.split('\n')[:-1]
     for p in pid:

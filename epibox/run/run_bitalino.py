@@ -1,5 +1,6 @@
 # built-in
 import json
+import sys
 
 # local
 from epibox.bit.manage_devices import pause_devices, connect_devices, start_devices
@@ -19,6 +20,8 @@ from epibox.bit.get_battery import get_battery
 def main():
 
     devices = []
+    a = sys.getrecursionlimit()
+    sys.setrecursionlimit(11000)
 
     try:
         client = setup_client()
