@@ -21,7 +21,7 @@ def main():
 
     devices = []
     a = sys.getrecursionlimit()
-    sys.setrecursionlimit(11000)
+    sys.setrecursionlimit(11000000)
 
     try:
         client = setup_client()
