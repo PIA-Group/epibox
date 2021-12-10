@@ -9,7 +9,7 @@ def on_message(client, userdata, message):
 
     if message[0] == 'RESTART':
         client.loop_stop()
-        #startup.main()
+        #client.keepAlive = False
 
     elif message[0] == 'INTERRUPT':
         client.keepAlive = False

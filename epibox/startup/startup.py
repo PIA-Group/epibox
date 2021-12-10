@@ -18,9 +18,6 @@ def random_str(length):
 
 def on_message(client, userdata, message):
 
-    global sys_args
-    global devices
-
     message = str(message.payload.decode("utf-8"))
     print(message)
     message = ast.literal_eval(message)
@@ -78,14 +75,15 @@ def on_message(client, userdata, message):
     elif message[0] == 'NEW CONFIG DEFAULT':
         username = pwd.getpwuid(os.getuid())[0]
 
-        with open('/home/{}/Documents/epibox/args.json'.format(username), 'r') as json_file:
-            defaults = json_file.read()
-            defaults = ast.literal_eval(defaults)
+        try:
+            with open('/home/{}/Documents/epibox/args.json'.format(username), 'r') as json_file:
+                defaults = json_file.read()
+                defaults = ast.literal_eval(defaults)
+        except Exception as e:
+            defaults = {'initial_dir': 'EpiBOX Core', 'fs': 1000, 'channels': [], 'save_raw': 'true', 'service': 'Bitalino'}
 
         for key in message[1].keys():
             defaults[key] = message[1][key]
-
-        print(f'defaults: {defaults}')
         
         with open('/home/{}/Documents/epibox/args.json'.format(username), 'w+') as json_file:
             json.dump(defaults, json_file)
@@ -94,9 +92,12 @@ def on_message(client, userdata, message):
     elif message[0] == 'NEW MAC':
         username = pwd.getpwuid(os.getuid())[0]
 
-        with open('/home/{}/Documents/epibox/args.json'.format(username), 'r') as json_file:
-            defaults = json_file.read()
-            defaults = ast.literal_eval(defaults)
+        try:
+            with open('/home/{}/Documents/epibox/args.json'.format(username), 'r') as json_file:
+                defaults = json_file.read()
+                defaults = ast.literal_eval(defaults)
+        except Exception as e:
+            defaults = {'initial_dir': 'EpiBOX Core', 'fs': 1000, 'channels': [], 'save_raw': 'true', 'service': 'Bitalino'}
 
         defaults['devices_mac'] = message[1]
 
@@ -129,12 +130,6 @@ def on_message(client, userdata, message):
  
 def main():
 
-    global devices
-    devices = []
-
-    global sys_args
-    sys_args = {'initial_dir': None, 'fs': None, 'channels': None, 'save_raw': None, 'devices_mac': [], 'patient_id': None, 'service': None}
-
     client_name = random_str(6)
     print('Client name (startup):', client_name)
     host_name = '192.168.0.10'
@@ -163,12 +158,7 @@ def main():
             continue
 
         else:
-
             client.loop_stop()
-            # with open('/home/{}/Documents/epibox/args.json'.format(username), 'w+') as json_file:
-            #     json.dump(sys_args, json_file)
-
-            # run_bitalino.main(devices)
 
     except Exception as e:
         print(e)
