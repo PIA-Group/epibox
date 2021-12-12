@@ -7,14 +7,14 @@ from datetime import datetime
 from epibox.common.disconnect_system import disconnect_system
 
 
-def error_kill(client, devices, msg, mqtt_msg='ERROR', a_file=None, annot_file=None, drift_log_file=None, files_open=True):
+def error_kill(client, devices, msg, mqtt_msg='ERROR', a_file=None, annot_file=None, drift_log_file=None, files_open=True, devices_connected=True):
 
     print(msg)
     client.publish('rpi', str([mqtt_msg]))
     client.loop_stop()
 
     # Disconnect the system
-    disconnect_system(devices, a_file, annot_file, drift_log_file, files_open)
+    disconnect_system(devices, a_file, annot_file, drift_log_file, files_open, devices_connected)
     
 
     pid = subprocess.run(['sudo', 'pgrep', 'python'], capture_output=True, text=True).stdout.split('\n')[:-1]

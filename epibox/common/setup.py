@@ -61,6 +61,11 @@ def setup_config():
     service = opt['service']
     opt['devices_mac'] = [m for m in opt['devices_mac'].values() if m != '']
 
+    if opt['initial_dir'] == 'EpiBOX Core':
+        opt['initial_dir'] = '/home/{}/Documents/epibox/acquisitions'.format(username)
+    else: 
+        opt['initial_dir'] = '/media/{}/'.format(username) + opt['initial_dir'] + '/acquisitions'
+
     print('ID: {}'.format(opt['patient_id']))
     print('folder: {}'.format(opt['initial_dir']))
     print('fs: {}'.format(opt['fs']))

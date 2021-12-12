@@ -1,11 +1,10 @@
 # built-in
 import json
-import sys
 
 # local
 from epibox.bit.manage_devices import pause_devices, connect_devices, start_devices
 from epibox.exceptions.exception_manager import error_disconnect, error_kill, client_kill
-from epibox.mqtt_manager.setup import setup_client, setup_config, setup_variables
+from epibox.common.setup import setup_client, setup_config, setup_variables
 from epibox.common.create_folder import create_folder
 from epibox.common.open_file import open_file
 from epibox.common.write_file import write_annot_file
@@ -20,8 +19,6 @@ from epibox.bit.get_battery import get_battery
 def main():
 
     devices = []
-    a = sys.getrecursionlimit()
-    sys.setrecursionlimit(11000000)
 
     try:
         client = setup_client()
@@ -35,7 +32,7 @@ def main():
         devices = connect_devices(client, devices, opt, already_timed_out, files_open=False)
     
     except Exception as e:
-        error_kill(client, devices, msg='Failed initial setup', files_open=False)
+        error_kill(client, devices, msg='Failed initial setup', files_open=False, devices_connected=False)
 
     try:
         a_file, annot_file, drift_log_file, save_fmt, header = open_file(directory, devices, channels, sensors, opt['fs'], save_raw, service)

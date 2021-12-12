@@ -12,8 +12,9 @@ def on_message(client, userdata, message):
     message = ast.literal_eval(message)
 
     if message[0] == 'RESTART':
-        client.loop_stop()
-        #client.keepAlive = False
+        #client.loop_stop()
+        # client.keepAlive = False
+        print('Not sure what to do here yet')
 
     elif message[0] == 'INTERRUPT':
         client.keepAlive = False
@@ -65,7 +66,6 @@ def on_message(client, userdata, message):
             listDrives += ['{} ({:.1f}% livre)'.format(drive, (free/total)*100)]
 
         total, _ , free = shutil.disk_usage('/')
-
         listDrives += ['EpiBOX Core ({:.1f}% livre)'.format((free/total)*100)]
 
         client.publish(topic='rpi', qos=2, payload="{}".format(listDrives))
