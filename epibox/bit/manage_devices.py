@@ -58,7 +58,7 @@ def connect_devices(client, devices, opt, already_timed_out, a_file=None, annot_
             try:
                 
                 connected = False
-                time.sleep(5)
+                time.sleep(3)
                 connected, devices = connect_device(mac, client, devices)
 
                 if connected and mac in [d.macAddress for d in devices]:
@@ -72,7 +72,7 @@ def connect_devices(client, devices, opt, already_timed_out, a_file=None, annot_
 
             except Exception as e:
 
-                if not already_timed_out and (time.time() - init_connect_time > 10*i):
+                if not already_timed_out and (time.time() - init_connect_time > 3*i):
                     timeout_json = json.dumps(['TIMEOUT', '{}'.format(mac)])
                     client.publish('rpi', timeout_json)
                     already_timed_out = True
