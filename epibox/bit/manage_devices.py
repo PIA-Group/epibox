@@ -53,7 +53,7 @@ def connect_devices(client, devices, opt, already_timed_out, a_file=None, annot_
             i += 1
 
             if (time.time() - init_connect_time) > 120:
-                error_kill(client, devices, 'Failed to reconnect to devices', a_file, annot_file, drift_log_file, files_open)
+                error_kill(client, devices, 'Failed to reconnect to devices', 'ERROR', a_file, annot_file, drift_log_file, files_open)
 
             try:
                 
@@ -75,6 +75,7 @@ def connect_devices(client, devices, opt, already_timed_out, a_file=None, annot_
                 if not already_timed_out and (time.time() - init_connect_time > 3*i):
                     timeout_json = json.dumps(['TIMEOUT', '{}'.format(mac)])
                     client.publish('rpi', timeout_json)
+
                     already_timed_out = True
 
                 continue
