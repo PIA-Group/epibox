@@ -68,13 +68,16 @@ def connect_devices(client, devices, opt, already_timed_out, a_file=None, annot_
                     break
 
                 else:
+                    if time.time() - init_connect_time > 3*i:
+                        timeout_json = json.dumps(['TRYING TO CONNECT', '{}'.format(mac)])
+                        client.publish('rpi', timeout_json)
                     raise Exception
 
             except Exception as e:
 
-                if time.time() - init_connect_time > 3*i:
+                if not already_timed_out and (time.time() - init_connect_time > 3*i):
 
-                    timeout_json = json.dumps(['TRYING TO CONNECT', '{}'.format(mac)])
+                    timeout_json = json.dumps(['TIMEOUT', '{}'.format(mac)])
                     client.publish('rpi', timeout_json)
 
                     already_timed_out = True
