@@ -78,7 +78,7 @@ def on_message(client, userdata, message):
                 defaults = json_file.read()
                 defaults = ast.literal_eval(defaults)
         except Exception as e:
-            defaults = {'initial_dir': 'EpiBOX Core', 'fs': 1000, 'channels': [], 'save_raw': 'true', 'service': 'Bitalino'}
+            defaults = {'initial_dir': 'EpiBOX Core', 'fs': 1000, 'channels': [], 'save_raw': 'true', 'patient_id':'default', 'service': 'Bitalino'}
 
         config = json.dumps(['DEFAULT CONFIG', defaults])
         client.publish(topic='rpi', qos=2, payload=config)
@@ -94,7 +94,7 @@ def on_message(client, userdata, message):
                 defaults = json_file.read()
                 defaults = ast.literal_eval(defaults)
         except Exception as e:
-            defaults = {'initial_dir': 'EpiBOX Core', 'fs': 1000, 'channels': [], 'save_raw': 'true', 'service': 'Bitalino'}
+            defaults = {'initial_dir': 'EpiBOX Core', 'fs': 1000, 'channels': [], 'save_raw': 'true', 'patient_id':'default', 'service': 'Bitalino'}
 
         for key in message[1].keys():
             defaults[key] = message[1][key]
@@ -114,7 +114,7 @@ def on_message(client, userdata, message):
                 defaults = json_file.read()
                 defaults = ast.literal_eval(defaults)
         except Exception as e:
-            defaults = {'initial_dir': 'EpiBOX Core', 'fs': 1000, 'channels': [], 'save_raw': 'true', 'service': 'Bitalino'}
+            defaults = {'initial_dir': 'EpiBOX Core', 'fs': 1000, 'channels': [], 'save_raw': 'true', 'patient_id':'default', 'service': 'Bitalino'}
 
         defaults['devices_mac'] = message[1]
 
