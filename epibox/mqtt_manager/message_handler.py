@@ -102,6 +102,9 @@ def on_message(client, userdata, message):
         with open('/home/{}/Documents/epibox/args.json'.format(username), 'w+') as json_file:
             json.dump(defaults, json_file)
 
+        msg = json.dumps(['RECEIVED DEFAULT'])
+        client.publish(topic='rpi', qos=2, payload=msg)
+
         
     elif message[0] == 'NEW MAC':
         username = pwd.getpwuid(os.getuid())[0]
@@ -117,3 +120,6 @@ def on_message(client, userdata, message):
 
         with open('/home/{}/Documents/epibox/args.json'.format(username), 'w+') as json_file:
             json.dump(defaults, json_file)
+
+        msg = json.dumps(['RECEIVED DEFAULT'])
+        client.publish(topic='rpi', qos=2, payload=msg)
