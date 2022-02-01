@@ -22,7 +22,7 @@ def main():
 
     try:
         client = setup_client()
-        opt, channels, sensors, service, save_raw = setup_config()
+        opt, channels, sensors, service, save_raw = setup_config(client)
         t_all, already_notified_pause, system_started, files_open = setup_variables()
 
         # Use/create the patient folder ===============================================================

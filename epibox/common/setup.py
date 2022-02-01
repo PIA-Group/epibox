@@ -1,4 +1,5 @@
 # built-in
+from http import client
 import pwd
 import os
 import ast
@@ -7,7 +8,7 @@ import ast
 import paho.mqtt.client as mqtt
 
 # local
-from epibox.mqtt_manager.message_handler import on_message
+from epibox.mqtt_manager.message_handler import on_message, send_default
 from epibox.mqtt_manager.utils import random_str
 
 def setup_client():
@@ -34,12 +35,20 @@ def setup_client():
     return client
 
 
-def setup_config():
-
+def setup_config(client):
+    
     username = pwd.getpwuid(os.getuid())[0]
+
+    send_default(client, username)
+
     with open('/home/{}/Documents/epibox/args.json'.format(username), 'r') as json_file:
         opt = json_file.read()
         opt = ast.literal_eval(opt)
+
+    try: 
+        opt['devices_mac'].values()
+    except Exception as e:
+        opt['devices_mac'] = {'MAC1': '12:34:56:78:91:10','MAC2': ''}
 
     if not opt['channels']:
         channels = []
@@ -51,20 +60,35 @@ def setup_config():
     else:
         channels = []
         sensors = []
-        for triplet in opt['channels']:
-            
-            triplet[0] = opt['devices_mac'][triplet[0]] # replace MAC ID for corresponding MAC
-            channels += [triplet[:2]]
-            sensors += [triplet[2]]
+        try:
+            for triplet in opt['channels']:
+                triplet[0] = opt['devices_mac'][triplet[0]] # replace MAC ID for corresponding MAC
+                channels += [triplet[:2]]
+                sensors += [triplet[2]]
+        except Exception as e:
+            print(e)
+            for tt,triplet in enumerate(opt['channels']):
+                if tt < 7:
+                    triplet[0] = opt['devices_mac']['MAC1'] 
+                else: 
+                    triplet[0] = opt['devices_mac']['MAC2']
+                channels += [triplet[:2]]
+                sensors += [triplet[2]]
 
-    save_raw = bool(opt['save_raw'])
+
+    if 'save_raw' in opt.keys(): save_raw = bool(opt['save_raw'])
+    else: save_raw = bool(opt['saveRaw'])
+
     service = opt['service']
     opt['devices_mac'] = [m for m in opt['devices_mac'].values() if m != '']
 
     if opt['initial_dir'] == 'EpiBOX Core':
         opt['initial_dir'] = '/home/{}/Documents/epibox/acquisitions'.format(username)
     else: 
-        opt['initial_dir'] = '/media/{}/'.format(username) + opt['initial_dir'] + '/acquisitions'
+        if os.path.isdir('/media/{}/'.format(username) + opt['initial_dir']):
+            opt['initial_dir'] = '/media/{}/'.format(username) + opt['initial_dir'] + '/acquisitions'
+        else:
+            opt['initial_dir'] = '/home/{}/Documents/epibox/acquisitions'.format(username)
 
     print('ID: {}'.format(opt['patient_id']))
     print('folder: {}'.format(opt['initial_dir']))
