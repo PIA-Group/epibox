@@ -64,7 +64,7 @@ def main():
 
                 if not system_started:
 
-                    get_battery(client, devices, service)
+                    # get_battery(client, devices, service)
                     
                     try:
                         sync_param = start_devices(client, devices, opt['fs'], channels, header)
