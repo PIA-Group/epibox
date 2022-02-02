@@ -1,7 +1,6 @@
 # built-in
 import subprocess
 import time
-from datetime import datetime
 
 # local
 from epibox.common.disconnect_system import disconnect_system
@@ -36,6 +35,21 @@ def error_disconnect(client, devices, msg, a_file=None, files_open=True):
     system_started = False
 
     return devices, system_started
+
+
+def kill_after_duration(client, devices, a_file=None, files_open=True):
+
+    client.publish('rpi', str(['STOPPED']))
+    client.loop_stop()
+
+    # Disconnect the system
+    write_summary_file(a_file.name)
+    disconnect_system(devices, a_file, files_open)
+
+    time.sleep(3)
+    pid = subprocess.run(['sudo', 'pgrep', 'python'], capture_output=True, text=True).stdout.split('\n')[:-1]
+    for p in pid:
+        subprocess.run(['kill', '-9', p])
 
 
 def client_kill(client, devices, msg, a_file=None, files_open=True):

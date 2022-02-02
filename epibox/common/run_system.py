@@ -10,12 +10,11 @@ import numpy as np
 
 # local 
 from epibox.common.read_modules import read_modules
-from epibox.common.close_file import close_file
 from epibox.common.write_file import write_file
-from epibox.common.open_file import open_file
+from epibox.exceptions.exception_manager import kill_after_duration
 
 
-def run_system(devices, a_file, sync_param, directory, mac_channels, sensors, fs, save_fmt, header):
+def run_system(devices, a_file, sync_param, directory, mac_channels, sensors, fs, save_raw, service, save_fmt, header, client):
     
     if time.time()-sync_param['strtime'] > 5:
 
@@ -52,16 +51,7 @@ def run_system(devices, a_file, sync_param, directory, mac_channels, sensors, fs
 
     # Open new file each hour
     if sync_param['close_file'] == 1:
-        # close the file
-        print('closing')
-        close_file(a_file)
-
-        # Open a new file
-        print('Opening new file')
-        a_file, save_fmt = open_file(directory, devices, mac_channels, sensors, fs)
-
-        sync_param['close_file'] = 0
-        sync_param['inittime'] = time.time()
+        kill_after_duration(client, devices, a_file)
 
     # -----------------------------------------------------------------
     return t, t_display, a_file, sync_param

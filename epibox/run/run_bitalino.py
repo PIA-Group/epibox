@@ -79,7 +79,7 @@ def main():
                 #     client.keepAlive = False
 
                 try:
-                    _, t_disp, a_file, sync_param = run_system(devices, a_file, sync_param, directory, channels, sensors, opt['fs'], save_fmt, header)
+                    _, t_disp, a_file, sync_param = run_system(devices, a_file, sync_param, directory, channels, sensors, opt['fs'], save_raw, service, save_fmt, header, client)
 
                     t_display = process_data.decimate(t_disp, opt['fs'])
                     t_all += t_display[0]
