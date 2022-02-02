@@ -7,9 +7,8 @@ import json
 import numpy as np
 
 # local
-from epibox.exceptions.exception_manager import error_kill
 from epibox.common.connect_device import connect_device
-
+from epibox.exceptions.exception_manager import error_kill
 
 def start_devices(client, devices, fs, mac_channels, header):
 

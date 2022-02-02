@@ -92,7 +92,7 @@ def main():
                 # Handle misconnection of the devices--------------------------------------------------------------------------------------------
                 except Exception as e:
                     
-                    devices, system_started = error_disconnect(client, devices, e, directory, a_file)
+                    devices, system_started = error_disconnect(client, devices, e, a_file)
 
                     # Reconnect the devices
                     devices = connect_devices(client, devices, opt, already_timed_out, a_file)
