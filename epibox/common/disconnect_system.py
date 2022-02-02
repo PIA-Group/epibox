@@ -1,7 +1,7 @@
 # local
-from epibox.common.close_file import close_file 
+from epibox.common.close_file import close_file
 
-def disconnect_system(devices, a_file=None, annot_file=None, drift_log_file=None, files_open=True, devices_connected=True): 
+def disconnect_system(devices, a_file=None, files_open=True, devices_connected=True): 
 
     if devices_connected:
         for device in devices:
@@ -13,6 +13,6 @@ def disconnect_system(devices, a_file=None, annot_file=None, drift_log_file=None
                 continue
 
     if files_open:
-        close_file(a_file, annot_file, drift_log_file)
+        close_file(a_file)
 
 

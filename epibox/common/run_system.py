@@ -15,7 +15,7 @@ from epibox.common.write_file import write_file
 from epibox.common.open_file import open_file
 
 
-def run_system(devices, a_file, annot_file, drift_log_file, sync_param, directory, mac_channels, sensors, fs, save_fmt, header):
+def run_system(devices, a_file, sync_param, directory, mac_channels, sensors, fs, save_fmt, header):
     
     if time.time()-sync_param['strtime'] > 5:
 
@@ -45,7 +45,7 @@ def run_system(devices, a_file, annot_file, drift_log_file, sync_param, director
     sys.stdout.flush()
     
     try:
-        write_file(t, a_file, drift_log_file, sync_param, str(i), save_fmt)
+        write_file(t, a_file, sync_param, str(i), save_fmt)
         
     except Exception as e:
         print(e)
@@ -54,14 +54,14 @@ def run_system(devices, a_file, annot_file, drift_log_file, sync_param, director
     if sync_param['close_file'] == 1:
         # close the file
         print('closing')
-        close_file(a_file, annot_file, drift_log_file)
+        close_file(a_file)
 
         # Open a new file
         print('Opening new file')
-        a_file, annot_file, drift_log_file, save_fmt = open_file(directory, devices, mac_channels, sensors, fs)
+        a_file, save_fmt = open_file(directory, devices, mac_channels, sensors, fs)
 
         sync_param['close_file'] = 0
         sync_param['inittime'] = time.time()
 
     # -----------------------------------------------------------------
-    return t, t_display, a_file, drift_log_file, sync_param
+    return t, t_display, a_file, sync_param

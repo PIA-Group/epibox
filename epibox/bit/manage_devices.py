@@ -32,7 +32,7 @@ def start_devices(client, devices, fs, mac_channels, header):
         device.start(SamplingRate=fs, analogChannels=channels)
 
     now = datetime.now()
-    print('start {}'.format(datetime.now()))
+    print('start {}'.format(now))
     sync_param['sync_time'] = now.strftime("%Y-%m-%d %H:%M:%S.%f")
 
     client.publish('rpi', str(['ACQUISITION ON']))                 
@@ -40,7 +40,7 @@ def start_devices(client, devices, fs, mac_channels, header):
     return sync_param
 
 
-def connect_devices(client, devices, opt, already_timed_out, a_file=None, annot_file=None, drift_log_file=None, files_open=True):
+def connect_devices(client, devices, opt, already_timed_out, a_file=None, files_open=True):
 
     for mac in opt['devices_mac']:
 
@@ -53,7 +53,7 @@ def connect_devices(client, devices, opt, already_timed_out, a_file=None, annot_
             i += 1
 
             if (time.time() - init_connect_time) > 120:
-                error_kill(client, devices, 'Failed to reconnect to devices', 'ERROR', a_file, annot_file, drift_log_file, files_open)
+                error_kill(client, devices, 'Failed to reconnect to devices', 'ERROR', a_file, files_open)
 
             try:
                 
@@ -64,7 +64,6 @@ def connect_devices(client, devices, opt, already_timed_out, a_file=None, annot_
                 if connected and mac in [d.macAddress for d in devices]:
                     now = datetime.now()
                     save_time = now.strftime("%H-%M-%S").rstrip('0')
-                    client.newAnnot = ['reconnection'], save_time
                     break
 
                 else:

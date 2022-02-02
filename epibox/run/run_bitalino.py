@@ -35,7 +35,7 @@ def main():
         error_kill(client, devices, msg='Failed initial setup', files_open=False, devices_connected=False)
 
     try:
-        a_file, annot_file, drift_log_file, save_fmt, header = open_file(directory, devices, channels, sensors, opt['fs'], save_raw, service)
+        a_file, save_fmt, header = open_file(directory, devices, channels, sensors, opt['fs'], save_raw, service)
         files_open = True
 
     except Exception as e:
@@ -48,7 +48,7 @@ def main():
 
             if client.newAnnot != None:
                 print(f'annot: {client.newAnnot}')
-                write_annot_file(annot_file, client.newAnnot)
+                write_annot_file(a_file.name, client.newAnnot)
                 client.newAnnot = None
 
             if client.pauseAcq and not already_notified_pause:
@@ -79,7 +79,7 @@ def main():
                 #     client.keepAlive = False
 
                 try:
-                    _, t_disp, a_file, drift_log_file, sync_param = run_system(devices, a_file, annot_file, drift_log_file, sync_param, directory, channels, sensors, opt['fs'], save_fmt, header)
+                    _, t_disp, a_file, sync_param = run_system(devices, a_file, sync_param, directory, channels, sensors, opt['fs'], save_fmt, header)
 
                     t_display = process_data.decimate(t_disp, opt['fs'])
                     t_all += t_display[0]
@@ -92,21 +92,21 @@ def main():
                 # Handle misconnection of the devices--------------------------------------------------------------------------------------------
                 except Exception as e:
                     
-                    devices, system_started = error_disconnect(client, devices, e, a_file, annot_file, drift_log_file)
+                    devices, system_started = error_disconnect(client, devices, e, directory, a_file)
 
                     # Reconnect the devices
-                    devices = connect_devices(client, devices, opt, already_timed_out, a_file, annot_file, drift_log_file)
+                    devices = connect_devices(client, devices, opt, already_timed_out, a_file)
 
                     system_started = False
-                    a_file, annot_file, drift_log_file, save_fmt, header = open_file(directory, devices, channels, sensors, opt['fs'], save_raw, service)
+                    a_file, save_fmt, header = open_file(directory, devices, channels, sensors, opt['fs'], save_raw, service)
 
             else:
                 pass
 
-        client_kill(client, devices, 'You have stopped the acquisition', a_file, annot_file, drift_log_file, files_open)
+        client_kill(client, devices, 'You have stopped the acquisition', a_file, files_open)
 
     except KeyboardInterrupt:
-        client_kill(client, devices, 'You have stopped the acquisition', a_file, annot_file, drift_log_file, files_open)
+        client_kill(client, devices, 'You have stopped the acquisition', a_file, files_open)
 
 
     # =========================================================================================================
