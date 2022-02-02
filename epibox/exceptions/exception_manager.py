@@ -23,7 +23,7 @@ def error_kill(client, devices, msg, mqtt_msg='ERROR', a_file=None, files_open=T
         subprocess.run(['kill', '-9', p])
 
 
-def error_disconnect(client, devices, msg, directory, a_file=None, files_open=True):
+def error_disconnect(client, devices, msg, a_file=None, files_open=True):
 
     print('The system has stopped running because ' + str(msg))
     client.publish('rpi', str(['RECONNECTING']))
