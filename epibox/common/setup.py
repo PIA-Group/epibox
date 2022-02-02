@@ -1,11 +1,14 @@
 # built-in
 from http import client
+import time
 import pwd
 import os
 import ast
 
 # third-party
+import json
 import paho.mqtt.client as mqtt
+from epibox.exceptions.exception_manager import error_kill
 
 # local
 from epibox.mqtt_manager.message_handler import on_message, send_default
@@ -82,13 +85,7 @@ def setup_config(client):
     service = opt['service']
     opt['devices_mac'] = [m for m in opt['devices_mac'].values() if m != '']
 
-    if opt['initial_dir'] == 'EpiBOX Core':
-        opt['initial_dir'] = '/home/{}/Documents/epibox/acquisitions'.format(username)
-    else: 
-        if os.path.isdir('/media/{}/'.format(username) + opt['initial_dir']):
-            opt['initial_dir'] = '/media/{}/'.format(username) + opt['initial_dir'] + '/acquisitions'
-        else:
-            opt['initial_dir'] = '/home/{}/Documents/epibox/acquisitions'.format(username)
+    opt = check_storage(client, [], opt)
 
     print('ID: {}'.format(opt['patient_id']))
     print('folder: {}'.format(opt['initial_dir']))
@@ -111,3 +108,35 @@ def setup_variables():
 
     return t_all, already_notified_pause, system_started, files_open
 
+
+def check_storage(client, devices, opt):
+
+    username = pwd.getpwuid(os.getuid())[0]
+
+    init_connect_time = time.time()
+    print(f'Searching for storage module: {opt["initial_dir"]}')
+
+    i = 0
+    while client.keepAlive:
+        print(i)
+        i += 1
+
+        if (time.time() - init_connect_time) > 120:
+            error_kill(client, devices, 'Failed to find storage', 'ERROR', files_open=False, devices_connected=False)
+
+        try:
+            
+            if os.path.isdir('/media/{}/'.format(username) + opt['initial_dir']):
+                opt['initial_dir'] = '/media/{}/'.format(username) + opt['initial_dir'] + '/acquisitions'
+                break
+
+            else:
+                if time.time() - init_connect_time > 3*i:
+                    timeout_json = json.dumps(['INSERT STORAGE'])
+                    client.publish('rpi', timeout_json)
+                raise Exception
+
+        except Exception as e:
+            continue
+
+    return opt

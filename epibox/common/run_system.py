@@ -43,11 +43,7 @@ def run_system(devices, a_file, sync_param, directory, mac_channels, sensors, fs
     sys.stdout.write("\rElapsed time (seconds): % i " % i)
     sys.stdout.flush()
     
-    try:
-        write_file(t, a_file, sync_param, str(i), save_fmt)
-        
-    except Exception as e:
-        print(e)
+    write_file(t, a_file, sync_param, str(i), save_fmt)
 
     # Open new file each hour
     if sync_param['close_file'] == 1:

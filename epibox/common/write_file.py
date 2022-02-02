@@ -1,7 +1,6 @@
 # built-in
 from datetime import datetime
 import os
-from time import strptime 
 
 # third-party
 import numpy as np
@@ -29,9 +28,11 @@ def write_drift_log(filename, sync_param):
 
 
 def write_annot_file(recording_name, annot):
-    with open(os.path.join(os.path.split(recording_name)[0], 'ANNOT' + os.path.split(recording_name)[1][1:]), 'a+') as file:
-        file.write('{}	{}\n'.format(annot[0], annot[1]))
-  
+
+    with open(os.path.join(os.path.split(recording_name)[0], 'annotations' + '.txt'), 'a+') as file:
+        file.write(f'{os.path.split(recording_name)[1]}    {annot[0]}    {annot[1]}    {datetime.now()}\n')
+
+
 
 def write_summary_file(recording_name):
 
@@ -39,4 +40,4 @@ def write_summary_file(recording_name):
     print(f'duration: {str(duration)}')
 
     with open(os.path.join(os.path.split(recording_name)[0], 'summary' + '.txt'), 'a+') as file:
-        file.write('{}	{}\n'.format(os.path.split(recording_name)[1], str(duration).split('.')[0]))
+        file.write('{}  {}\n'.format(os.path.split(recording_name)[1], str(duration).split('.')[0]))

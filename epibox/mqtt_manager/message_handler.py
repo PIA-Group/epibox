@@ -31,9 +31,6 @@ def send_default(client, username):
         total, _ , free = shutil.disk_usage('/media/{}/{}'.format(username, drive))
         listDrives += ['{} ({:.1f}% livre)'.format(drive, (free/total)*100)]
 
-    total, _ , free = shutil.disk_usage('/')
-    listDrives += ['EpiBOX Core ({:.1f}% livre)'.format((free/total)*100)]
-
     client.publish(topic='rpi', qos=2, payload="{}".format(listDrives))
 
     
