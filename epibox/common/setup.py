@@ -15,6 +15,8 @@ from epibox.mqtt_manager.message_handler import on_message, send_default
 from epibox.mqtt_manager.utils import random_str
 
 def setup_client():
+    # Set up MQTT client =========================================================================
+
     client_name = random_str(6)
     print('Client name (acquisition):', client_name)
     host_name = '192.168.0.10'
@@ -39,10 +41,11 @@ def setup_client():
 
 
 def setup_config(client):
-    
+    # Access default configurations on EpiBOX Core and save them to variables ======================
+
     username = pwd.getpwuid(os.getuid())[0]
 
-    send_default(client, username)
+    send_default(client, username) # inform the EpiBOX App which are the current default devices
 
     with open('/home/{}/Documents/epibox/args.json'.format(username), 'r') as json_file:
         opt = json_file.read()
@@ -53,7 +56,9 @@ def setup_config(client):
     except Exception as e:
         opt['devices_mac'] = {'MAC1': '12:34:56:78:91:10','MAC2': ''}
 
+    
     if not opt['channels']:
+        # if default "channels" is empty, acquire all
         channels = []
         for device in opt['devices_mac'].values():
             for i in range(1, 7):
@@ -61,6 +66,7 @@ def setup_config(client):
         sensors = ['-' for i in range(len(channels))]
 
     else:
+        # default "channels" is saved in the format [[MAC1, channel1, sensor1], [MAC1, channel2, sensor2], ...]
         channels = []
         sensors = []
         try:
@@ -85,6 +91,7 @@ def setup_config(client):
     service = opt['service']
     opt['devices_mac'] = [m for m in opt['devices_mac'].values() if m != '']
 
+    # check if default storage is available | if not, terminate setup loop and acquisition
     opt = check_storage(client, [], opt)
 
     print('ID: {}'.format(opt['patient_id']))
@@ -110,7 +117,9 @@ def setup_variables():
 
 
 def check_storage(client, devices, opt):
-
+    # Check if default storage is available | loop runs continuosly until it find the storage or until timeout
+    # If timeout, setup loop and acquisition are terminated
+    
     username = pwd.getpwuid(os.getuid())[0]
 
     init_connect_time = time.time()

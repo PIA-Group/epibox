@@ -16,26 +16,20 @@ from epibox.exceptions.exception_manager import kill_after_duration
 
 def run_system(devices, a_file, sync_param, directory, mac_channels, sensors, fs, save_raw, service, save_fmt, header, client):
     
+    # Read batch of samples from the devices and save to the active session's file  ===============================
+
     if time.time()-sync_param['strtime'] > 5:
 
         sync_param['strtime'] = time.time()
-        now = datetime.now()
-        sync_time = now.strftime("%Y-%m-%d %H:%M:%S.%f").rstrip('0')
-        sync_param['sync_time'] = sync_time
-        sync_param['connection'] = 1
-        sync_param['sync_append'] = 0
     
     for i,device in enumerate(devices):
         sync_param['sync_arr_'+chr(ord('@')+i+1)] = np.zeros(1000, dtype = float)
     
     now = datetime.now()
     sync_param['sync_time'] = now.strftime("%Y-%m-%d %H:%M:%S.%f")
-    t, t_str, t_display = read_modules(devices, mac_channels, sensors, header)
 
-    
-    # Open new file each hour
-    if time.time()-sync_param['inittime'] > 60*60:
-        sync_param['close_file'] = 1
+    # read batch of samples from devices
+    t, t_str, t_display = read_modules(devices, mac_channels, sensors, header)    
 
     i = time.time() - sync_param['inittime']
 
@@ -43,11 +37,11 @@ def run_system(devices, a_file, sync_param, directory, mac_channels, sensors, fs
     sys.stdout.write("\rElapsed time (seconds): % i " % i)
     sys.stdout.flush()
     
+    # Write batch of samples to file
     write_file(t, a_file, sync_param, str(i), save_fmt)
 
     # Open new file each hour
     if sync_param['close_file'] == 1:
         kill_after_duration(client, devices, a_file)
 
-    # -----------------------------------------------------------------
     return t, t_display, a_file, sync_param

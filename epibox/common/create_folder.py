@@ -1,7 +1,7 @@
 import os
 
 def create_folder(initial_dir, nb, service):
-
+    # Create folder with patient ID unless it already exists
     directory = os.path.join(initial_dir, nb)
     directory = os.path.join(directory, service)
     

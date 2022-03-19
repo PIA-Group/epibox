@@ -12,6 +12,9 @@ from epibox.exceptions.exception_manager import error_kill
 
 def start_devices(client, devices, fs, mac_channels, header):
 
+    # Start acquisition with the biosignal acquisition devices, considering the chosen sampling ferquency
+    # and channels
+
     dig_Out = 0
     now = datetime.now()
     sync_param = {'flag_sync' : 0 , 'inittime' : time.time(), 'strtime': time.time(), 'sync_time' : now.strftime("%Y-%m-%d %H:%M:%S.%f").rstrip('0'), 'dig_Out' : dig_Out, 'close_file' : 0, 'mode': 0, 'diff': 1000, 'save_log': 1, 'count_a': 1000, 'sync_append': 0}
@@ -40,6 +43,11 @@ def start_devices(client, devices, fs, mac_channels, header):
 
 
 def connect_devices(client, devices, opt, already_timed_out, a_file=None, files_open=True):
+
+    # This script attempts to connect to the default biosignal acquisition devices in a continuous loop. 
+    # The loop stops only if:
+    #       - connection is successful 
+    #       - timeout is achieved (2min)
 
     for mac in opt['devices_mac']:
 

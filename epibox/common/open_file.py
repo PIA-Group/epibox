@@ -16,6 +16,8 @@ def open_file(directory, devices, mac_channels, sensors, fs, save_raw, service):
     file_date = '"' + save_time[0:10] + '"'
     
     a_file = open(os.path.join(directory, 'A' + save_time + '.txt'), 'w') # data file
+
+    # create header for the acquisition file
     save_fmt, header = header2bitalino(a_file, file_time, file_date, devices, mac_channels, sensors, fs, save_raw, service)
     
 

@@ -1,3 +1,0 @@
-# OpenSignals Text File Format
-# {}
-# EndOfHeader
