@@ -31,8 +31,6 @@ from epibox import config_debug
 
 
 def main():
-    
-    debug_flag = False
 
     devices = []
 

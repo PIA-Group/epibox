@@ -5,6 +5,7 @@ import time
 # local
 from epibox.common.disconnect_system import disconnect_system
 from epibox.common.write_file import write_summary_file
+from epibox import config_debug
 
 
 def error_kill(client, devices, msg, mqtt_msg='ERROR', a_file=None, files_open=True, devices_connected=True):

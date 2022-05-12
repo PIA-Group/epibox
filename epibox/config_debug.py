@@ -1,6 +1,5 @@
 
 
-
 class Flags:
     """
     Class debug 
@@ -8,7 +7,7 @@ class Flags:
 
     def __init__(self):
 
-        self.debug = False
+        self.debug = True
 
 
 def log(message):
