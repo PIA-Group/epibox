@@ -11,7 +11,8 @@ def read_modules(devices, mac_channels, sensors, header):
     
     t = np.array([])
     t_display = np.array([])
-    #print('devices: {}'.format([d.macAddress for d in devices]))
+    # 
+    # config_debug.log('devices: {}'.format([d.macAddress for d in devices]))
     channels2get = [int(mac_chn[1])-1 for mac_chn in mac_channels]
         
     for i, device in enumerate(devices):
@@ -40,7 +41,7 @@ def read_modules(devices, mac_channels, sensors, header):
 
             t_read = np.hstack((np.reshape(np.array(seq), (-1,1)), t_nseq))
 
-        #print(t_read)
+        #config_debug.log(t_read)
 
         n = 0
         display_aux = np.array([])

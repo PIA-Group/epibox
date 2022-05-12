@@ -1,4 +1,5 @@
 # built-in
+from distutils.log import debug
 import json
 
 # local
@@ -10,6 +11,7 @@ from epibox.common.open_file import open_file
 from epibox.common.write_file import write_annot_file
 from epibox.common.run_system import run_system
 from epibox.common import process_data
+from epibox import config_debug
 
 
 # ****************************** MAIN SCRIPT ***********************************
@@ -29,6 +31,8 @@ from epibox.common import process_data
 
 
 def main():
+    
+    debug_flag = False
 
     devices = []
 
@@ -65,7 +69,7 @@ def main():
 
             if client.newAnnot != None:
                 # Write user annotation to file if one is received via MQTT ===============================
-                print(f'annot: {client.newAnnot}')
+                config_debug.log(f'annot: {client.newAnnot}')
                 write_annot_file(a_file.name, client.newAnnot)
                 client.newAnnot = None
 
@@ -88,7 +92,7 @@ def main():
                         already_timed_out = False
 
                     except Exception as e:
-                        print(e)
+                        config_debug.log(e)
                         pass
 
                 try:

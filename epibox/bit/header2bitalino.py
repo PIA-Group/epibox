@@ -1,6 +1,10 @@
 
+from glob import glob
+from epibox import config_debug
+
 
 def header2bitalino(filename, file_time, file_date, devices, mac_channels, sensors, fs, save_raw, service):
+
     
     filename.write('# OpenSignals Text File Format' + '\n')
     
@@ -58,7 +62,7 @@ def header2bitalino(filename, file_time, file_date, devices, mac_channels, senso
 
     header = {'resolution': resolution, 'save_raw': save_raw, 'service': service}
     
-    print("# " + str(mac_dict) + '\n')
+    config_debug.log(f'# {mac_dict} \n')
     filename.write("# " + str(mac_dict) + '\n')
     filename.write('# EndOfHeader' + '\n')
     

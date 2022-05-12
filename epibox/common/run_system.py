@@ -33,7 +33,7 @@ def run_system(devices, a_file, sync_param, directory, mac_channels, sensors, fs
 
     i = time.time() - sync_param['inittime']
 
-    # print elapsed time
+    # config_debug.log elapsed time
     sys.stdout.write("\rElapsed time (seconds): % i " % i)
     sys.stdout.flush()
     

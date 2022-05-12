@@ -48,6 +48,7 @@ def send_default(client, username):
 
 def on_message(client, userdata, message):
 
+    
     username = pwd.getpwuid(os.getuid())[0]
 
     message = str(message.payload.decode("utf-8"))
@@ -56,25 +57,25 @@ def on_message(client, userdata, message):
     if message[0] == 'RESTART':
         #client.loop_stop()
         # client.keepAlive = False
-        print('Not sure what to do here yet')
+        config_debug.log('Not sure what to do here yet')
 
     elif message[0] == 'INTERRUPT':
         client.keepAlive = False
 
     elif message[0] == 'PAUSE ACQ':
-        print('PAUSING ACQUISITION')
+        config_debug.log('PAUSING ACQUISITION')
         client.pauseAcq = True
 
     elif message[0] == 'RESUME ACQ':
-        print('RESUMING ACQUISITION')
+        config_debug.log('RESUMING ACQUISITION')
         client.pauseAcq = False
 
     elif message[0] == 'ANNOTATION':
-        print('RECEIVED ANNOT {} ----------------------'.format(message[1]))
+        config_debug.log('RECEIVED ANNOT {} ----------------------'.format(message[1]))
         client.newAnnot = message[1]
 
     elif message[0] == 'TURN OFF':
-        print('TURNING OFF RPI')
+        config_debug.log('TURNING OFF RPI')
         client.publish(topic='rpi', payload=str(['TURNED OFF']))
 
     elif message[0] == 'TURNED OFF':

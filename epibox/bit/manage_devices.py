@@ -9,6 +9,7 @@ import numpy as np
 # local
 from epibox.common.connect_device import connect_device
 from epibox.exceptions.exception_manager import error_kill
+from epibox import config_debug
 
 def start_devices(client, devices, fs, mac_channels, header):
 
@@ -34,7 +35,8 @@ def start_devices(client, devices, fs, mac_channels, header):
         device.start(SamplingRate=fs, analogChannels=channels)
 
     now = datetime.now()
-    print('start {}'.format(now))
+    
+    config_debug.log('start {now}')
     sync_param['sync_time'] = now.strftime("%Y-%m-%d %H:%M:%S.%f")
 
     client.publish('rpi', str(['ACQUISITION ON']))                 
@@ -44,6 +46,7 @@ def start_devices(client, devices, fs, mac_channels, header):
 
 def connect_devices(client, devices, opt, already_timed_out, a_file=None, files_open=True):
 
+    
     # This script attempts to connect to the default biosignal acquisition devices in a continuous loop. 
     # The loop stops only if:
     #       - connection is successful 
@@ -52,7 +55,7 @@ def connect_devices(client, devices, opt, already_timed_out, a_file=None, files_
     for mac in opt['devices_mac']:
 
         init_connect_time = time.time()
-        print('Searching for Module...' + mac)
+        config_debug.log(f'Searching for Module... {mac}')
 
         i = 0
         while client.keepAlive:
@@ -95,13 +98,15 @@ def connect_devices(client, devices, opt, already_timed_out, a_file=None, files_
 
 
 def pause_devices(client, devices):
+    
+    
 
     for device in devices:
 
         try:
             device.stop()
         except Exception as e:
-            print(e)
+            config_debug.log(e)
             continue
 
     client.publish('rpi', str(['PAUSED']))

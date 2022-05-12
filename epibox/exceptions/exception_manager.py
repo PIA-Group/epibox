@@ -9,7 +9,8 @@ from epibox.common.write_file import write_summary_file
 
 def error_kill(client, devices, msg, mqtt_msg='ERROR', a_file=None, files_open=True, devices_connected=True):
 
-    print(msg)
+    
+    config_debug.log(msg)
     client.publish('rpi', str([mqtt_msg]))
     client.loop_stop()
 
@@ -24,7 +25,8 @@ def error_kill(client, devices, msg, mqtt_msg='ERROR', a_file=None, files_open=T
 
 def error_disconnect(client, devices, msg, a_file=None, files_open=True):
 
-    print('The system has stopped running because ' + str(msg))
+    
+    config_debug.log('The system has stopped running because ' + str(msg))
     client.publish('rpi', str(['RECONNECTING']))
 
     # Disconnect the system
@@ -54,7 +56,8 @@ def kill_after_duration(client, devices, a_file=None, files_open=True):
 
 def client_kill(client, devices, msg, a_file=None, files_open=True):
 
-    print(msg)
+    
+    config_debug.log(msg)
     client.publish('rpi', str(['STOPPED']))
     client.loop_stop()
 
