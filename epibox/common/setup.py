@@ -18,92 +18,98 @@ from epibox import config_debug
 
 def setup_client():
     # Set up MQTT client =========================================================================
-    
+
     client_name = random_str(6)
-    config_debug.log(f'Client name (acquisition): {client_name}')
-    host_name = '192.168.0.10'
-    topic = 'rpi'
+    config_debug.log(f"Client name (acquisition): {client_name}")
+    host_name = "192.168.0.10"
+    topic = "rpi"
 
     client = mqtt.Client(client_name)
 
-    setattr(client, 'keepAlive', True)
-    setattr(client, 'pauseAcq', False)
-    setattr(client, 'newAnnot', None)
+    setattr(client, "keepAlive", True)
+    setattr(client, "pauseAcq", False)
+    setattr(client, "newAnnot", None)
 
-    client.username_pw_set(username='preepiseizures', password='preepiseizures')
+    client.username_pw_set(username="preepiseizures", password="preepiseizures")
     client.connect(host_name)
     client.subscribe(topic)
     client.on_message = on_message
     client.loop_start()
-    config_debug.log(f'Successfully subcribed to topic {topic}')
+    config_debug.log(f"Successfully subcribed to topic {topic}")
 
-    client.publish('rpi', str(['STARTING']))
+    client.publish("rpi", str(["STARTING"]))
 
     return client
 
 
 def setup_config(client):
     # Access default configurations on EpiBOX Core and save them to variables ======================
-    
+
     username = pwd.getpwuid(os.getuid())[0]
 
-    send_default(client, username) # inform the EpiBOX App which are the current default devices
+    send_default(
+        client, username
+    )  # inform the EpiBOX App which are the current default devices
 
-    with open('/home/{}/Documents/epibox/args.json'.format(username), 'r') as json_file:
+    with open("/home/{}/Documents/epibox/args.json".format(username), "r") as json_file:
         opt = json_file.read()
         opt = ast.literal_eval(opt)
 
-    try: 
-        opt['devices_mac'].values()
+    try:
+        opt["devices_mac"].values()
+        if opt["devices_mac"] == {}:
+            opt["devices_mac"] = {"MAC1": "12:34:56:78:91:10", "MAC2": ""}
     except Exception as e:
-        opt['devices_mac'] = {'MAC1': '12:34:56:78:91:10','MAC2': ''}
+        opt["devices_mac"] = {"MAC1": "12:34:56:78:91:10", "MAC2": ""}
 
-    
-    if not opt['channels']:
+    if not opt["channels"]:
         # if default "channels" is empty, acquire all
         channels = []
-        for device in opt['devices_mac'].values():
+        for device in opt["devices_mac"].values():
             for i in range(1, 7):
                 channels += [[device, str(i)]]
-        sensors = ['-' for i in range(len(channels))]
+        sensors = ["-" for i in range(len(channels))]
 
     else:
         # default "channels" is saved in the format [[MAC1, channel1, sensor1], [MAC1, channel2, sensor2], ...]
         channels = []
         sensors = []
         try:
-            for triplet in opt['channels']:
-                triplet[0] = opt['devices_mac'][triplet[0]] # replace MAC ID for corresponding MAC
+            for triplet in opt["channels"]:
+                triplet[0] = opt["devices_mac"][
+                    triplet[0]
+                ]  # replace MAC ID for corresponding MAC
                 channels += [triplet[:2]]
                 sensors += [triplet[2]]
         except Exception as e:
             config_debug.log(e)
-            for tt,triplet in enumerate(opt['channels']):
+            for tt, triplet in enumerate(opt["channels"]):
                 if tt < 7:
-                    triplet[0] = opt['devices_mac']['MAC1'] 
-                else: 
-                    triplet[0] = opt['devices_mac']['MAC2']
+                    triplet[0] = opt["devices_mac"]["MAC1"]
+                else:
+                    triplet[0] = opt["devices_mac"]["MAC2"]
                 channels += [triplet[:2]]
                 sensors += [triplet[2]]
 
+    if "save_raw" in opt.keys():
+        save_raw = bool(opt["save_raw"])
+    else:
+        save_raw = bool(opt["saveRaw"])
 
-    if 'save_raw' in opt.keys(): save_raw = bool(opt['save_raw'])
-    else: save_raw = bool(opt['saveRaw'])
-
-    service = opt['service']
-    opt['devices_mac'] = [m for m in opt['devices_mac'].values() if m != '']
+    service = opt["service"]
+    opt["devices_mac"] = [m for m in opt["devices_mac"].values() if m != ""]
 
     # check if default storage is available | if not, terminate setup loop and acquisition
     opt = check_storage(client, [], opt)
 
-    config_debug.log('ID: {}'.format(opt['patient_id']))
-    config_debug.log('folder: {}'.format(opt['initial_dir']))
-    config_debug.log('fs: {}'.format(opt['fs']))
-    config_debug.log(f'save_raw: {save_raw}')
-    config_debug.log(f'channels: {channels}')
-    config_debug.log('devices: {}'.format(opt['devices_mac']))
-    config_debug.log(f'sensors: {sensors}')
-    config_debug.log(f'service: {service}')
+    config_debug.log("ID: {}".format(opt["patient_id"]))
+    config_debug.log("folder: {}".format(opt["initial_dir"]))
+    config_debug.log("fs: {}".format(opt["fs"]))
+    config_debug.log(f"save_raw: {save_raw}")
+    config_debug.log(f"channels: {channels}")
+    config_debug.log("devices: {}".format(opt["devices_mac"]))
+    config_debug.log(f"sensors: {sensors}")
+    config_debug.log(f"service: {service}")
 
     return opt, channels, sensors, service, save_raw
 
@@ -112,7 +118,7 @@ def setup_variables():
 
     already_notified_pause = False
     system_started = False
-    files_open = False 
+    files_open = False
     t_all = []
 
     return t_all, already_notified_pause, system_started, files_open
@@ -121,7 +127,7 @@ def setup_variables():
 def check_storage(client, devices, opt):
     # Check if default storage is available | loop runs continuosly until it find the storage or until timeout
     # If timeout, setup loop and acquisition are terminated
-    
+
     username = pwd.getpwuid(os.getuid())[0]
 
     init_connect_time = time.time()
@@ -133,19 +139,27 @@ def check_storage(client, devices, opt):
         i += 1
 
         if (time.time() - init_connect_time) > 120:
-            error_kill(client, devices, 'Failed to find storage', 'ERROR', files_open=False, devices_connected=False)
+            error_kill(
+                client,
+                devices,
+                "Failed to find storage",
+                "ERROR",
+                files_open=False,
+                devices_connected=False,
+            )
 
         try:
-            
-            if os.path.isdir('/media/{}/'.format(username) + opt['initial_dir']):
-                opt['initial_dir'] = '/media/{}/'.format(username) + opt['initial_dir'] + '/acquisitions'
+
+            if os.path.isdir("/media/{}/".format(username) + opt["initial_dir"]):
+                opt["initial_dir"] = (
+                    "/media/{}/".format(username) + opt["initial_dir"] + "/acquisitions"
+                )
                 break
 
             else:
-                if time.time() - init_connect_time > 3*i:
-                    timeout_json = json.dumps(['INSERT STORAGE'])
-                    client.publish('rpi', timeout_json)
-                raise Exception
+                if time.time() - init_connect_time > 3 * i:
+                    client.publish("rpi", str(["INSERT STORAGE"]))
+                continue
 
         except Exception as e:
             continue
