@@ -8,6 +8,7 @@ import ast
 # third-party
 import json
 import paho.mqtt.client as mqtt
+from epibox.common.get_defaults import get_default
 from epibox.exceptions.exception_manager import error_kill
 
 # local
@@ -47,20 +48,9 @@ def setup_config(client):
 
     username = pwd.getpwuid(os.getuid())[0]
 
-    send_default(
-        client, username
-    )  # inform the EpiBOX App which are the current default devices
-
-    with open("/home/{}/Documents/epibox/args.json".format(username), "r") as json_file:
-        opt = json_file.read()
-        opt = ast.literal_eval(opt)
-
-    try:
-        opt["devices_mac"].values()
-        if opt["devices_mac"] == {}:
-            opt["devices_mac"] = {"MAC1": "12:34:56:78:91:10", "MAC2": ""}
-    except Exception as e:
-        opt["devices_mac"] = {"MAC1": "12:34:56:78:91:10", "MAC2": ""}
+    # inform the EpiBOX App which are the current default devices
+    send_default(client, username)
+    opt = get_default(username)
 
     if not opt["channels"]:
         # if default "channels" is empty, acquire all
@@ -91,12 +81,9 @@ def setup_config(client):
                 channels += [triplet[:2]]
                 sensors += [triplet[2]]
 
-    if "save_raw" in opt.keys():
-        save_raw = bool(opt["save_raw"])
-    else:
-        save_raw = bool(opt["saveRaw"])
-
+    save_raw = bool(opt["save_raw"])
     service = opt["service"]
+
     opt["devices_mac"] = [m for m in opt["devices_mac"].values() if m != ""]
 
     # check if default storage is available | if not, terminate setup loop and acquisition
@@ -149,7 +136,6 @@ def check_storage(client, devices, opt):
             )
 
         try:
-
             if os.path.isdir("/media/{}/".format(username) + opt["initial_dir"]):
                 opt["initial_dir"] = (
                     "/media/{}/".format(username) + opt["initial_dir"] + "/acquisitions"
@@ -159,7 +145,7 @@ def check_storage(client, devices, opt):
             else:
                 if time.time() - init_connect_time > 3 * i:
                     client.publish("rpi", str(["INSERT STORAGE"]))
-                continue
+                raise Exception
 
         except Exception as e:
             continue

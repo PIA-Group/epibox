@@ -6,25 +6,17 @@ import json
 import shutil
 import pwd
 
+# local
 from epibox import config_debug
+from epibox.common.get_defaults import get_default
 
 
 def send_default(client, username):
 
     ######## Default MAC addresses ########
 
-    try:
-        with open(
-            "/home/{}/Documents/epibox/args.json".format(username), "r"
-        ) as json_file:
-            defaults = json_file.read()
-            defaults = ast.literal_eval(defaults)
-            if defaults["devices_mac"] == {}:
-                defaults["devices_mac"] = {"MAC1": "12:34:56:78:91:10", "MAC2": ""}
-            listMAC = defaults["devices_mac"]
-    except Exception as e:
-        listMAC = {"MAC1": "12:34:56:78:91:10", "MAC2": ""}
-
+    defaults = get_default(username)
+    listMAC = defaults["devices_mac"]
     listMAC2 = json.dumps(
         [
             "DEFAULT MAC",
@@ -34,7 +26,6 @@ def send_default(client, username):
     )
 
     client.publish(topic="rpi", qos=2, payload=listMAC2)
-
     config = json.dumps(["DEFAULT CONFIG", defaults])
     client.publish(topic="rpi", qos=2, payload=config)
 
@@ -49,13 +40,10 @@ def send_default(client, username):
 
     client.publish(topic="rpi", qos=2, payload="{}".format(listDrives))
 
-    ######## Default configurations ########
-
 
 def on_message(client, userdata, message):
 
     username = pwd.getpwuid(os.getuid())[0]
-
     message = str(message.payload.decode("utf-8"))
     message = ast.literal_eval(message)
 
@@ -92,23 +80,7 @@ def on_message(client, userdata, message):
     ######## New default configuration ########
 
     elif message[0] == "NEW CONFIG DEFAULT":
-
-        try:
-            with open(
-                "/home/{}/Documents/epibox/args.json".format(username), "r"
-            ) as json_file:
-                defaults = json_file.read()
-                defaults = ast.literal_eval(defaults)
-        except Exception as e:
-            defaults = {
-                "initial_dir": "EpiBOX Core",
-                "fs": 1000,
-                "channels": [],
-                "devices_mac": {"MAC1": "12:34:56:78:91:10", "MAC2": ""},
-                "save_raw": "true",
-                "patient_id": "default",
-                "service": "Bitalino",
-            }
+        defaults = get_default(username)
 
         for key in message[1].keys():
             defaults[key] = message[1][key]
