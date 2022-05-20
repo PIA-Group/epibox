@@ -49,7 +49,6 @@ def kill_after_duration(client, devices, a_file=None, files_open=True):
     write_summary_file(a_file.name)
     disconnect_system(devices, a_file, files_open)
 
-    time.sleep(3)
     pid = subprocess.run(['sudo', 'pgrep', 'python'], capture_output=True, text=True).stdout.split('\n')[:-1]
     for p in pid:
         subprocess.run(['kill', '-9', p])
@@ -65,7 +64,6 @@ def client_kill(client, devices, msg, a_file=None, files_open=True):
     # Disconnect the system
     disconnect_system(devices, a_file, files_open)
 
-    time.sleep(3)
     pid = subprocess.run(['sudo', 'pgrep', 'python'], capture_output=True, text=True).stdout.split('\n')[:-1]
     for p in pid:
         subprocess.run(['kill', '-9', p])

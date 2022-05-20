@@ -68,7 +68,6 @@ def connect_devices(client, devices, opt, already_timed_out, a_file=None, files_
             try:
                 
                 connected = False
-                time.sleep(3)
                 connected, devices = connect_device(mac, client, devices)
 
                 if connected and mac in [d.macAddress for d in devices]:

@@ -7,6 +7,7 @@ from datetime import datetime
 
 # third-party
 import numpy as np
+from epibox import config_debug
 
 # local 
 from epibox.common.read_modules import read_modules

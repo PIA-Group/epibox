@@ -1,6 +1,6 @@
 # built-in
-from distutils.log import debug
 import json
+import pdb
 
 # local
 from epibox.bit.manage_devices import pause_devices, connect_devices, start_devices
@@ -38,6 +38,7 @@ def main():
         # Setup MQTT client | read default configurations | initiate variables ===========================
         client = setup_client()
         opt, channels, sensors, service, save_raw = setup_config(client)
+        config_debug.log(opt)
         t_all, already_notified_pause, system_started, files_open = setup_variables()
 
         # Create folder with patient ID

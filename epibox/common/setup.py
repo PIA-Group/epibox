@@ -129,7 +129,7 @@ def check_storage(client, devices, opt):
 
     i = 0
     while client.keepAlive:
-        config_debug.log(i)
+
         i += 1
 
         if (time.time() - init_connect_time) > 120:

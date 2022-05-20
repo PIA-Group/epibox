@@ -4,6 +4,8 @@ from copy import copy
 # third-party
 import numpy as np
 
+from epibox import config_debug
+
 
 
 def read_modules(devices, mac_channels, sensors, header):

@@ -17,10 +17,9 @@ def random_str(length):
 
 def connect_device(macAddress, client, devices):
     
-    
     connected = False
     devices = [d for d in devices if d] # remove None
-    config_debug.loc(f'devices: {devices}')
+    config_debug.log(f'devices: {devices}')
     
     if macAddress in [d.macAddress for d in devices]:
         try:
@@ -35,6 +34,7 @@ def connect_device(macAddress, client, devices):
 
         try: 
             device = bitalino.BITalino(macAddress, timeout=5)
+            
             devices += [device]
         except Exception as e:
             config_debug.log(e)

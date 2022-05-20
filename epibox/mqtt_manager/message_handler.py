@@ -6,6 +6,8 @@ import json
 import shutil
 import pwd
 
+from epibox import config_debug
+
 def send_default(client, username):
 
     ######## Default MAC addresses ########

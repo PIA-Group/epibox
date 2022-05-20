@@ -6,6 +6,8 @@ import os
 # third-party
 import numpy as np
 
+from epibox import config_debug
+
 
 def write_file(t, a_file, sync_param, time, fmt):
     write_acq_file(a_file, t, time, fmt)
@@ -25,7 +27,7 @@ def write_drift_log(filename, sync_param):
     else:
         filename.write('\n')
     
-    config_debug.log(('%s' % '  ' + sync_time))
+    # config_debug.log(('%s' % '  ' + sync_time))
 
 
 def write_annot_file(recording_name, annot):
