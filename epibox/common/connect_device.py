@@ -5,6 +5,10 @@ import random
 # third-party
 import bitalino
 
+# local
+from epibox import config_debug
+
+
 def random_str(length):
 
     letters = string.ascii_letters
@@ -15,11 +19,12 @@ def connect_device(macAddress, client, devices):
     
     connected = False
     devices = [d for d in devices if d] # remove None
-    print('devices: {}'.format(devices))
+    config_debug.log(f'devices: {devices}')
     
     if macAddress in [d.macAddress for d in devices]:
         try:
-            print('{} state: {}'.format(macAddress, [d.state()for d in devices if d.macAddress==macAddress]))
+            config_debug.log(f'{macAddress} state: {[d.state()for d in devices if d.macAddress==macAddress]}')
+            config_debug.log(f'{macAddress} state: {[d.state()for d in devices if d.macAddress==macAddress]}')
             connected = True
         
         except Exception as e:
@@ -29,10 +34,10 @@ def connect_device(macAddress, client, devices):
 
         try: 
             device = bitalino.BITalino(macAddress, timeout=5)
+            
             devices += [device]
         except Exception as e:
-            print(e)
-        
+            config_debug.log(e)
                                 
         if macAddress in [d.macAddress for d in devices]:
             connected = True

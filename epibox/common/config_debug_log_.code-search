@@ -1,0 +1,71 @@
+# Query: config_debug.log(
+
+42 results - 13 files
+
+Makefile:
+  20: 		config_debug.log(f"{target}-20s {help}", debug_flag)
+
+epibox/bit/header2bitalino.py:
+  66:     config_debug.log(f'# {mac_dict} \n', debug_flag)
+
+epibox/bit/manage_devices.py:
+   39:     config_debug.log('start {now}', debug_flag)
+   58:         config_debug.log(f'Searching for Module... {mac}', debug_flag)
+  109:             config_debug.log(e, debug_flag)
+
+epibox/common/connect_device.py:
+  27:             config_debug.log(f'{macAddress} state: {[d.state()for d in devices if d.macAddress==macAddress]}', debug_flag)
+  28:             config_debug.log(f'{macAddress} state: {[d.state()for d in devices if d.macAddress==macAddress]}', debug_flag)
+  40:             config_debug.log(e, debug_flag)
+
+epibox/common/create_folder.py:
+  14:         config_debug.log(f'Created patient directory -- {directory}', debug_flag)
+  17:         config_debug.log(f'Directory -- {directory} -- already exists', debug_flag)
+
+epibox/common/emg_detection.py:
+  10:             config_debug.log(f'sum square: {np.sum(np.square(chn-np.mean(chn)))} | variance: {np.var(chn)} | mean sqrt: {np.mean(np.sqrt(chn))}\n', debug_flag)
+
+epibox/common/process_data.py:
+  28:         config_debug.log(f'combos: {combos}', debug_flag)
+  32:         config_debug.log(f'final_factors: {final_factors}', debug_flag)
+  47: #                 config_debug.log('after decimate: {}'.format(t_aux), debug_flag)
+  49: #                 config_debug.log(e, debug_flag)
+
+epibox/common/read_modules.py:
+  15:     # config_debug.log('devices: {}'.format([d.macAddress for d in devices]), debug_flag)
+  44:         #config_debug.log(t_read)
+
+epibox/common/setup.py:
+   23:     config_debug.log(f'Client name (acquisition): {client_name}', debug_flag)
+   38:     config_debug.log(f'Successfully subcribed to topic {topic}', debug_flag)
+   80:             config_debug.log(e, debug_flag)
+   99:     config_debug.log('ID: {}'.format(opt['patient_id']), debug_flag)
+  100:     config_debug.log('folder: {}'.format(opt['initial_dir']), debug_flag)
+  101:     config_debug.log('fs: {}'.format(opt['fs']), debug_flag)
+  102:     config_debug.log(f'save_raw: {save_raw}', debug_flag)
+  103:     config_debug.log(f'channels: {channels}', debug_flag)
+  104:     config_debug.log('devices: {}'.format(opt['devices_mac']), debug_flag)
+  105:     config_debug.log(f'sensors: {sensors}', debug_flag)
+  106:     config_debug.log(f'service: {service}', debug_flag)
+  128:     config_debug.log(f'Searching for storage module: {opt["initial_dir"]}', debug_flag)
+  132:         config_debug.log(i, debug_flag)
+
+epibox/common/write_file.py:
+  28:     config_debug.log(('%s' % '  ' + sync_time), debug_flag)
+  41:     config_debug.log(f'duration: {str(duration)}', debug_flag)
+
+epibox/exceptions/exception_manager.py:
+  13:     config_debug.log(msg, debug_flag)
+  29:     config_debug.log('The system has stopped running because ' + str(msg), debug_flag)
+  60:     config_debug.log(msg, debug_flag)
+
+epibox/mqtt_manager/message_handler.py:
+  60:         config_debug.log('Not sure what to do here yet', debug_flag)
+  66:         config_debug.log('PAUSING ACQUISITION', debug_flag)
+  70:         config_debug.log('RESUMING ACQUISITION', debug_flag)
+  74:         config_debug.log('RECEIVED ANNOT {} ----------------------'.format(message[1]), debug_flag)
+  78:         config_debug.log('TURNING OFF RPI', debug_flag)
+
+epibox/run/run_bitalino.py:
+  72:                 config_debug.log(f'annot: {client.newAnnot}', debug_flag)
+  95:                         config_debug.log(e, debug_flag)

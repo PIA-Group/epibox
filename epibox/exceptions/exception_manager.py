@@ -5,11 +5,13 @@ import time
 # local
 from epibox.common.disconnect_system import disconnect_system
 from epibox.common.write_file import write_summary_file
+from epibox import config_debug
 
 
 def error_kill(client, devices, msg, mqtt_msg='ERROR', a_file=None, files_open=True, devices_connected=True):
 
-    print(msg)
+    
+    config_debug.log(msg)
     client.publish('rpi', str([mqtt_msg]))
     client.loop_stop()
 
@@ -24,7 +26,8 @@ def error_kill(client, devices, msg, mqtt_msg='ERROR', a_file=None, files_open=T
 
 def error_disconnect(client, devices, msg, a_file=None, files_open=True):
 
-    print('The system has stopped running because ' + str(msg))
+    
+    config_debug.log('The system has stopped running because ' + str(msg))
     client.publish('rpi', str(['RECONNECTING']))
 
     # Disconnect the system
@@ -46,7 +49,6 @@ def kill_after_duration(client, devices, a_file=None, files_open=True):
     write_summary_file(a_file.name)
     disconnect_system(devices, a_file, files_open)
 
-    time.sleep(3)
     pid = subprocess.run(['sudo', 'pgrep', 'python'], capture_output=True, text=True).stdout.split('\n')[:-1]
     for p in pid:
         subprocess.run(['kill', '-9', p])
@@ -54,14 +56,14 @@ def kill_after_duration(client, devices, a_file=None, files_open=True):
 
 def client_kill(client, devices, msg, a_file=None, files_open=True):
 
-    print(msg)
+    
+    config_debug.log(msg)
     client.publish('rpi', str(['STOPPED']))
     client.loop_stop()
 
     # Disconnect the system
     disconnect_system(devices, a_file, files_open)
 
-    time.sleep(3)
     pid = subprocess.run(['sudo', 'pgrep', 'python'], capture_output=True, text=True).stdout.split('\n')[:-1]
     for p in pid:
         subprocess.run(['kill', '-9', p])

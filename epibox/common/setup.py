@@ -13,12 +13,14 @@ from epibox.exceptions.exception_manager import error_kill
 # local
 from epibox.mqtt_manager.message_handler import on_message, send_default
 from epibox.mqtt_manager.utils import random_str
+from epibox import config_debug
+
 
 def setup_client():
     # Set up MQTT client =========================================================================
-
+    
     client_name = random_str(6)
-    print('Client name (acquisition):', client_name)
+    config_debug.log(f'Client name (acquisition): {client_name}')
     host_name = '192.168.0.10'
     topic = 'rpi'
 
@@ -33,7 +35,7 @@ def setup_client():
     client.subscribe(topic)
     client.on_message = on_message
     client.loop_start()
-    print('Successfully subcribed to topic', topic)
+    config_debug.log(f'Successfully subcribed to topic {topic}')
 
     client.publish('rpi', str(['STARTING']))
 
@@ -42,7 +44,7 @@ def setup_client():
 
 def setup_config(client):
     # Access default configurations on EpiBOX Core and save them to variables ======================
-
+    
     username = pwd.getpwuid(os.getuid())[0]
 
     send_default(client, username) # inform the EpiBOX App which are the current default devices
@@ -75,7 +77,7 @@ def setup_config(client):
                 channels += [triplet[:2]]
                 sensors += [triplet[2]]
         except Exception as e:
-            print(e)
+            config_debug.log(e)
             for tt,triplet in enumerate(opt['channels']):
                 if tt < 7:
                     triplet[0] = opt['devices_mac']['MAC1'] 
@@ -94,14 +96,14 @@ def setup_config(client):
     # check if default storage is available | if not, terminate setup loop and acquisition
     opt = check_storage(client, [], opt)
 
-    print('ID: {}'.format(opt['patient_id']))
-    print('folder: {}'.format(opt['initial_dir']))
-    print('fs: {}'.format(opt['fs']))
-    print('save_raw: {}'.format(save_raw))
-    print('channels: {}'.format(channels))
-    print('devices: {}'.format(opt['devices_mac']))
-    print('sensors: {}'.format(sensors))
-    print('service: {}'.format(service))
+    config_debug.log('ID: {}'.format(opt['patient_id']))
+    config_debug.log('folder: {}'.format(opt['initial_dir']))
+    config_debug.log('fs: {}'.format(opt['fs']))
+    config_debug.log(f'save_raw: {save_raw}')
+    config_debug.log(f'channels: {channels}')
+    config_debug.log('devices: {}'.format(opt['devices_mac']))
+    config_debug.log(f'sensors: {sensors}')
+    config_debug.log(f'service: {service}')
 
     return opt, channels, sensors, service, save_raw
 
@@ -123,11 +125,11 @@ def check_storage(client, devices, opt):
     username = pwd.getpwuid(os.getuid())[0]
 
     init_connect_time = time.time()
-    print(f'Searching for storage module: {opt["initial_dir"]}')
+    config_debug.log(f'Searching for storage module: {opt["initial_dir"]}')
 
     i = 0
     while client.keepAlive:
-        print(i)
+
         i += 1
 
         if (time.time() - init_connect_time) > 120:

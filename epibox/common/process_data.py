@@ -3,7 +3,11 @@ from scipy import signal
 import itertools
 import numpy as np
 
+from epibox import config_debug
+
 def get_factors(n):
+
+    
     n2 = n
     i = 2
     factors = []
@@ -23,11 +27,11 @@ def get_factors(n):
 
     while np.prod(final_factors) != n2:
         
-        print('combos: {}'.format(combos))
+        config_debug.log(f'combos: {combos}')
         combination = [[i,p] for i,p in enumerate([x * y for x,y in combos]) if p <= 13]
 
         final_factors += [combination[0][1]]
-        print('final_factors: {}'.format(final_factors))
+        config_debug.log(f'final_factors: {final_factors}')
 
         combos.remove(combos[combination[0][0]])
     
@@ -42,9 +46,9 @@ def decimate(t, fs):
 #         for n in get_factors(fs / 100):
 #             try:
 #                 t_aux = signal.decimate(t_aux, int(n))
-#                 print('after decimate: {}'.format(t_aux))
+#                 config_debug.log('after decimate: {}'.format(t_aux))
 #             except Exception as e:
-#                 print(e)
+#                 config_debug.log(e)
 #                 pass
         if fs >= 1000:
             t_aux = signal.decimate(t_aux, 10)

@@ -1,6 +1,10 @@
 # built-in
 import json
 
+#local
+from epibox import config_debug 
+
+
 def get_battery(client, devices, service):
 
     if service != 'Mini':
@@ -19,5 +23,5 @@ def get_battery(client, devices, service):
             client.publish('rpi', battery_json)
 
         except Exception as e:
-            print(e)
+            config_debug.log(e)
             pass
