@@ -66,6 +66,7 @@ def main():
 
     try:
         # Open acquisition file | get format and header info ============================================
+        print(f"directory {directory}")
         a_file, save_fmt, header = open_file(
             directory, devices, channels, sensors, opt["fs"], save_raw, service
         )
