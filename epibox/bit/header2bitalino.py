@@ -1,4 +1,3 @@
-from glob import glob
 from epibox import config_debug
 
 
@@ -24,7 +23,6 @@ def header2bitalino(
 
         fmt += ["%i"]
         mac_dict[device.macAddress] = {}
-        config_debug.log("1")
         mac_dict[device.macAddress]["sensor"] = []
         for i, elem in enumerate(mac_channels):
             if elem[0] == device.macAddress:
@@ -33,30 +31,22 @@ def header2bitalino(
                     fmt += ["%i"]
                 else:
                     fmt += ["%.2f"]
-        config_debug.log("2")
         mac_dict[device.macAddress]["device name"] = "Device " + str(n_device + 1)
-        config_debug.log("3")
 
         aux = ["A" + elem[1] for elem in mac_channels if elem[0] == device.macAddress]
-        config_debug.log("4")
         mac_dict[device.macAddress]["column"] = ["nSeq"] + aux
 
         mac_dict[device.macAddress]["sync interval"] = 2  # ???
 
         mac_dict[device.macAddress]["start time"] = file_time
-        config_debug.log("5")
         mac_dict[device.macAddress]["device connection"] = device.macAddress
-        config_debug.log("6")
 
         mac_dict[device.macAddress]["channels"] = [
             int(elem[1]) for elem in mac_channels if elem[0] == device.macAddress
         ]
-        config_debug.log("7")
 
         mac_dict[device.macAddress]["date"] = file_date
-        config_debug.log("8")
         # mac_dict[device.macAddress]["firmware version"] = device.version()
-        config_debug.log("9")
 
         if service == "Bitalino":
             mac_dict[device.macAddress]["device"] = "bitalino_rev"
@@ -65,7 +55,6 @@ def header2bitalino(
 
         mac_dict[device.macAddress]["sampling rate"] = fs
 
-        config_debug.log("10")
         if save_raw:
             mac_dict[device.macAddress]["label"] = [
                 "RAW"
@@ -78,7 +67,6 @@ def header2bitalino(
                 for i, elem in enumerate(mac_channels)
                 if elem[0] == device.macAddress
             ]
-        config_debug.log("11")
         aux = [10, 10, 10, 10, 6, 6]
         aux2 = [1 for elem in mac_channels if elem[0] == device.macAddress]
         mac_dict[device.macAddress]["resolution"] = [4] + [
