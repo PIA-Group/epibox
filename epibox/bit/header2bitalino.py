@@ -55,7 +55,7 @@ def header2bitalino(
 
         mac_dict[device.macAddress]["date"] = file_date
         config_debug.log("8")
-        mac_dict[device.macAddress]["firmware version"] = device.version()
+        # mac_dict[device.macAddress]["firmware version"] = device.version()
         config_debug.log("9")
 
         if service == "Bitalino":
