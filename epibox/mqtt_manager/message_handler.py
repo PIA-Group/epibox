@@ -27,7 +27,6 @@ def send_default(client, username):
     ######## Default MAC addresses ########
 
     defaults = get_default(username)
-    config_debug.log(f"defaults: {defaults}")
     listMAC = defaults["devices_mac"]
     listMAC2 = json.dumps(
         [
@@ -37,10 +36,8 @@ def send_default(client, username):
         ]
     )
 
-    config_debug.log(f"default mac: {listMAC2}")
     client.publish(topic="rpi", qos=2, payload=listMAC2)
     config = json.dumps(["DEFAULT CONFIG", defaults])
-    config_debug.log(f"default config: {config}")
     client.publish(topic="rpi", qos=2, payload=config)
 
 
