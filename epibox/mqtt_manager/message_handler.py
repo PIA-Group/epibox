@@ -13,6 +13,17 @@ from epibox.common.get_defaults import get_default
 
 def send_default(client, username):
 
+    ######## Available drives ########
+
+    listDrives = ["DRIVES"]
+    drives = os.listdir("/media/{}/".format(username))
+
+    for drive in drives:
+        total, _, free = shutil.disk_usage("/media/{}/{}".format(username, drive))
+        listDrives += ["{} ({:.1f}% livre)".format(drive, (free / total) * 100)]
+
+    client.publish(topic="rpi", qos=2, payload="{}".format(listDrives))
+
     ######## Default MAC addresses ########
 
     defaults = get_default(username)
@@ -28,17 +39,6 @@ def send_default(client, username):
     client.publish(topic="rpi", qos=2, payload=listMAC2)
     config = json.dumps(["DEFAULT CONFIG", defaults])
     client.publish(topic="rpi", qos=2, payload=config)
-
-    ######## Available drives ########
-
-    listDrives = ["DRIVES"]
-    drives = os.listdir("/media/{}/".format(username))
-
-    for drive in drives:
-        total, _, free = shutil.disk_usage("/media/{}/{}".format(username, drive))
-        listDrives += ["{} ({:.1f}% livre)".format(drive, (free / total) * 100)]
-
-    client.publish(topic="rpi", qos=2, payload="{}".format(listDrives))
 
 
 def on_message(client, userdata, message):
