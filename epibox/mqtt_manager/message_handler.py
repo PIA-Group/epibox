@@ -27,6 +27,7 @@ def send_default(client, username):
     ######## Default MAC addresses ########
 
     defaults = get_default(username)
+    config_debug.log(f"defaults: {defaults}")
     listMAC = defaults["devices_mac"]
     listMAC2 = json.dumps(
         [
