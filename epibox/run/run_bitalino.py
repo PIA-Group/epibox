@@ -1,5 +1,6 @@
 # built-in
 import json
+from time import sleep
 
 # local
 from epibox.bit.manage_devices import pause_devices, connect_devices, start_devices
@@ -56,6 +57,7 @@ def main():
         )
 
     except Exception as e:
+        sleep(3)
         error_kill(
             client,
             devices,
@@ -86,6 +88,7 @@ def main():
                 write_annot_file(a_file.name, client.newAnnot)
                 client.newAnnot = None
 
+            config_debug.log("im here")
             if client.pauseAcq and not already_notified_pause:
                 # Pause acquisition if command is received via MQTT ========================================
                 devices = pause_devices(client, devices)
