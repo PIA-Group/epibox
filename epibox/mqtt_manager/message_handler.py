@@ -9,6 +9,7 @@ import pwd
 # local
 from epibox import config_debug
 from epibox.common.get_defaults import get_default
+from epibox.exceptions.system_exceptions import ExceptionCode, MQTTConnectionError
 
 
 def send_default(client, username):
@@ -22,7 +23,11 @@ def send_default(client, username):
         total, _, free = shutil.disk_usage("/media/{}/{}".format(username, drive))
         listDrives += ["{} ({:.1f}% livre)".format(drive, (free / total) * 100)]
 
-    client.publish(topic="rpi", qos=2, payload="{}".format(listDrives))
+    message_info = client.publish(
+        topic="rpi", qos=2, payload="{}".format(listDrives)
+    )  # raises ValueError and TypeError
+    if message_info.rc == 4:
+        raise MQTTConnectionError
 
     ######## Default MAC addresses ########
 
@@ -36,9 +41,19 @@ def send_default(client, username):
         ]
     )
 
-    client.publish(topic="rpi", qos=2, payload=listMAC2)
+    message_info = client.publish(
+        topic="rpi", qos=2, payload=listMAC2
+    )  # raises ValueError and TypeError
+    if message_info.rc == 4:
+        raise MQTTConnectionError
+
     config = json.dumps(["DEFAULT CONFIG", defaults])
-    client.publish(topic="rpi", qos=2, payload=config)
+
+    message_info = client.publish(
+        topic="rpi", qos=2, payload=config
+    )  # raises ValueError and TypeError
+    if message_info.rc == 4:
+        raise MQTTConnectionError
 
 
 def on_message(client, userdata, message):
@@ -69,7 +84,9 @@ def on_message(client, userdata, message):
 
     elif message[0] == "TURN OFF":
         config_debug.log("TURNING OFF RPI")
-        client.publish(topic="rpi", payload=str(["TURNED OFF"]))
+        message_info = client.publish(topic="rpi", payload=str(["TURNED OFF"]))
+        if message_info.rc == 4:
+            raise MQTTConnectionError
 
     elif message[0] == "TURNED OFF":
         subprocess.run(["sudo", "shutdown", "-h", "now"])
@@ -91,4 +108,6 @@ def on_message(client, userdata, message):
             json.dump(defaults, json_file)
 
         msg = json.dumps(["RECEIVED DEFAULT"])
-        client.publish(topic="rpi", qos=2, payload=msg)
+        message_info = client.publish(topic="rpi", qos=2, payload=msg)
+        if message_info.rc == 4:
+            raise MQTTConnectionError

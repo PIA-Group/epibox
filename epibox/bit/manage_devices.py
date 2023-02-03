@@ -5,11 +5,19 @@ import json
 
 # third-party
 import numpy as np
+import serial
+import bluetooth
 
 # local
 from epibox.common.connect_device import connect_device
-from epibox.exceptions.exception_manager import error_kill
 from epibox import config_debug
+from epibox.exceptions.system_exceptions import (
+    DeviceConnectionTimeout,
+    DeviceNotIDLEError,
+    DeviceNotInAcquisitionError,
+    MQTTConnectionError,
+)
+
 
 def start_devices(client, devices, fs, mac_channels, header):
 
@@ -18,76 +26,110 @@ def start_devices(client, devices, fs, mac_channels, header):
 
     dig_Out = 0
     now = datetime.now()
-    sync_param = {'flag_sync' : 0 , 'inittime' : time.time(), 'strtime': time.time(), 'sync_time' : now.strftime("%Y-%m-%d %H:%M:%S.%f").rstrip('0'), 'dig_Out' : dig_Out, 'close_file' : 0, 'mode': 0, 'diff': 1000, 'save_log': 1, 'count_a': 1000, 'sync_append': 0}
+    sync_param = {
+        "flag_sync": 0,
+        "inittime": time.time(),
+        "strtime": time.time(),
+        "sync_time": now.strftime("%Y-%m-%d %H:%M:%S.%f").rstrip("0"),
+        "dig_Out": dig_Out,
+        "close_file": 0,
+        "mode": 0,
+        "diff": 1000,
+        "save_log": 1,
+        "count_a": 1000,
+        "sync_append": 0,
+    }
     # mode: 0 if not started acquisition yet (or if paused) and 1 otherwise (used to write in drift_log_file)
-    
+
     for i in range(len(devices)):
-        sync_param['sync_arr_'+chr(ord('@')+i+1)] = np.zeros(1000, dtype = float)
+        sync_param["sync_arr_" + chr(ord("@") + i + 1)] = np.zeros(1000, dtype=float)
 
     # Initialize devices
     for device in devices:
 
-        if header['service'] == 'Bitalino' or header['service'] == 'Mini':
-            channels = [int(elem[1])-1 for elem in mac_channels if elem[0]==device.macAddress]
+        if header["service"] == "Bitalino" or header["service"] == "Mini":
+            channels = [
+                int(elem[1]) - 1
+                for elem in mac_channels
+                if elem[0] == device.macAddress
+            ]
         else:
-            channels = [int(elem[1]) for elem in mac_channels if elem[0]==device.macAddress]
-            
-        device.start(SamplingRate=fs, analogChannels=channels)
+            channels = [
+                int(elem[1]) for elem in mac_channels if elem[0] == device.macAddress
+            ]
+
+        try:
+            device.start(SamplingRate=fs, analogChannels=channels)
+
+        except Exception as e:
+            config_debug.log(e)
+            raise DeviceNotIDLEError
 
     now = datetime.now()
-    
-    config_debug.log('start {now}')
-    sync_param['sync_time'] = now.strftime("%Y-%m-%d %H:%M:%S.%f")
 
-    client.publish('rpi', str(['ACQUISITION ON']))                 
-    
+    config_debug.log("start {now}")
+    sync_param["sync_time"] = now.strftime("%Y-%m-%d %H:%M:%S.%f")
+
+    message_info = client.publish("rpi", str(["ACQUISITION ON"]))
+    if message_info.rc == 4:  # MQTT_ERR_NO_CONN
+        raise MQTTConnectionError
+
     return sync_param
 
 
-def connect_devices(client, devices, opt, already_timed_out, a_file=None, files_open=True):
+def connect_devices(
+    client, devices, opt, already_timed_out, a_file=None, files_open=True
+):
 
-    
-    # This script attempts to connect to the default biosignal acquisition devices in a continuous loop. 
+    # This script attempts to connect to the default biosignal acquisition devices in a continuous loop.
     # The loop stops only if:
-    #       - connection is successful 
+    #       - connection is successful
     #       - timeout is achieved (2min)
 
-    for mac in opt['devices_mac']:
+    for mac in opt["devices_mac"]:
 
         init_connect_time = time.time()
-        config_debug.log(f'Searching for Module... {mac}')
+        config_debug.log(f"Searching for Module... {mac}")
 
-        i = 0
-        while client.keepAlive:
-
-            i += 1
+        for i in range(100000):
 
             if (time.time() - init_connect_time) > 120:
-                error_kill(client, devices, 'Failed to reconnect to devices', 'ERROR', a_file, files_open)
+                raise DeviceConnectionTimeout
+                # TODO
 
             try:
-                
                 connected = False
                 connected, devices = connect_device(mac, client, devices)
 
-                if connected and mac in [d.macAddress for d in devices]:
-                    now = datetime.now()
-                    save_time = now.strftime("%H-%M-%S").rstrip('0')
-                    break
+                if not (connected and mac in [d.macAddress for d in devices]):
+                    if time.time() - init_connect_time > 3 * i:
+                        timeout_json = json.dumps(
+                            ["TRYING TO CONNECT", "{}".format(mac)]
+                        )
+                        message_info = client.publish("rpi", timeout_json)
+                        if message_info.rc == 4:
+                            raise MQTTConnectionError
 
-                else:
-                    if time.time() - init_connect_time > 3*i:
-                        timeout_json = json.dumps(['TRYING TO CONNECT', '{}'.format(mac)])
-                        client.publish('rpi', timeout_json)
-                    raise Exception
+            except serial.SerialException as e:
+                time.sleep(2)
+                config_debug.log(f"Serial connection refused: {e}")
+                if not already_timed_out and (time.time() - init_connect_time > 3 * i):
+                    timeout_json = json.dumps(["TIMEOUT", "{}".format(mac)])
+                    message_info = client.publish("rpi", timeout_json)
+                    if message_info.rc == 4:
+                        raise MQTTConnectionError
+                    already_timed_out = True
 
-            except Exception as e:
+                continue
 
-                if not already_timed_out and (time.time() - init_connect_time > 3*i):
-
-                    timeout_json = json.dumps(['TIMEOUT', '{}'.format(mac)])
-                    client.publish('rpi', timeout_json)
-
+            except bluetooth.btcommon.BluetoothError as e:
+                time.sleep(2)
+                config_debug.log(f"Bluetooth connection refused: {e}")
+                if not already_timed_out and (time.time() - init_connect_time > 3 * i):
+                    timeout_json = json.dumps(["TIMEOUT", "{}".format(mac)])
+                    message_info = client.publish("rpi", timeout_json)
+                    if message_info.rc == 4:
+                        raise MQTTConnectionError
                     already_timed_out = True
 
                 continue
@@ -95,20 +137,17 @@ def connect_devices(client, devices, opt, already_timed_out, a_file=None, files_
     return devices
 
 
-
 def pause_devices(client, devices):
-    
-    
 
-    for device in devices:
-
-        try:
+    try:
+        for device in devices:
             device.stop()
-        except Exception as e:
-            config_debug.log(e)
-            continue
+    except Exception as e:
+        config_debug.log(e)
+        raise DeviceNotInAcquisitionError
 
-    client.publish('rpi', str(['PAUSED']))
+    message_info = client.publish("rpi", str(["PAUSED"]))
+    if message_info.rc == 4:
+        raise MQTTConnectionError
 
     return devices
-

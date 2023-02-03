@@ -6,10 +6,9 @@ import os
 import ast
 
 # third-party
-import json
 import paho.mqtt.client as mqtt
 from epibox.common.get_defaults import get_default
-from epibox.exceptions.exception_manager import error_kill
+from epibox.exceptions.system_exceptions import MQTTConnectionError, StorageTimeout
 
 # local
 from epibox.mqtt_manager.message_handler import on_message, send_default
@@ -25,20 +24,24 @@ def setup_client():
     host_name = "192.168.0.10"
     topic = "rpi"
 
-    client = mqtt.Client(client_name)
+    client = mqtt.Client(client_name)  # raises ValueError and ConnectionRefusedError
 
     setattr(client, "keepAlive", True)
     setattr(client, "pauseAcq", False)
     setattr(client, "newAnnot", None)
 
     client.username_pw_set(username="preepiseizures", password="preepiseizures")
-    client.connect(host_name)
-    client.subscribe(topic)
+    client.connect(host_name)  # raises ValueError
+    client.subscribe(topic)  # raises ValueError
     client.on_message = on_message
     client.loop_start()
     config_debug.log(f"Successfully subcribed to topic {topic}")
 
-    client.publish("rpi", str(["STARTING"]))
+    message_info = client.publish(
+        "rpi", str(["STARTING"])
+    )  # raises ValueError and TypeError
+    if message_info.rc == 4:
+        raise MQTTConnectionError
 
     return client
 
@@ -71,7 +74,8 @@ def setup_config(client):
                 ]  # replace MAC ID for corresponding MAC
                 channels += [triplet[:2]]
                 sensors += [triplet[2]]
-        except Exception as e:
+
+        except Exception as e:  # TODO what kind of errors are raised?
             config_debug.log(e)
             for tt, triplet in enumerate(opt["channels"]):
                 if tt < 7:
@@ -120,34 +124,21 @@ def check_storage(client, devices, opt):
     init_connect_time = time.time()
     config_debug.log(f'Searching for storage module: {opt["initial_dir"]}')
 
-    i = 0
-    while client.keepAlive:
-
-        i += 1
+    for i in range(100000):
 
         if (time.time() - init_connect_time) > 120:
-            error_kill(
-                client,
-                devices,
-                "Failed to find storage",
-                "ERROR",
-                files_open=False,
-                devices_connected=False,
+            raise StorageTimeout
+
+        if os.path.isdir("/media/{}/".format(username) + opt["initial_dir"]):
+            opt["initial_dir"] = (
+                "/media/{}/".format(username) + opt["initial_dir"] + "/acquisitions"
             )
+            break
 
-        try:
-            if os.path.isdir("/media/{}/".format(username) + opt["initial_dir"]):
-                opt["initial_dir"] = (
-                    "/media/{}/".format(username) + opt["initial_dir"] + "/acquisitions"
-                )
-                break
-
-            else:
-                if time.time() - init_connect_time > 3 * i:
-                    client.publish("rpi", str(["INSERT STORAGE"]))
-                raise Exception
-
-        except Exception as e:
-            continue
+        else:
+            if time.time() - init_connect_time > 3 * i:
+                message_info = client.publish("rpi", str(["INSERT STORAGE"]))
+                if message_info.rc == 4:
+                    raise MQTTConnectionError
 
     return opt

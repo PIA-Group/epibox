@@ -11,7 +11,8 @@ def disconnect_system(devices, a_file=None, files_open=True, devices_connected=T
                 device.stop()
                 device.close()
 
-            except:
+            except Exception as e:
+                config_debug.log(e)
                 continue
 
     if files_open:
