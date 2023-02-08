@@ -95,7 +95,6 @@ def connect_devices(
 
             if (time.time() - init_connect_time) > 120:
                 raise DeviceConnectionTimeout
-                # TODO
 
             try:
                 connected = False

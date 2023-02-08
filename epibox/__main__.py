@@ -1,4 +1,4 @@
-from epibox.run import run_bitalino
+from epibox.run import run
 
-if __name__ == '__main__':
-    run_bitalino.main()
+if __name__ == "__main__":
+    run.main()

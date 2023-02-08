@@ -31,10 +31,7 @@ def kill_client(client):
 def close_devices(devices):
 
     for device in devices:
-        try:
-            device.close()
-        except Exception as e:
-            config_debug.log(e)
+        device.close()
 
     config_debug.log("  -- all devices closed --")
 
@@ -42,10 +39,7 @@ def close_devices(devices):
 def stop_devices(devices):
 
     for device in devices:
-        try:
-            device.stop()
-        except Exception as e:  # TODO unless device is not connected
-            config_debug.log(e)
+        device.stop()
 
     config_debug.log("  -- all devices stopped --")
 
@@ -111,14 +105,13 @@ def kill_case_5(client, devices, a_file):
     kill_subprocess()
 
 
-def handle_case_6(client, devices, a_file, system_started):
+def handle_case_6(devices, a_file, system_started):
     # Client: Y
     # Devices open: Y
     # File open: Y
     # Devices started: N (might not be true for all devices)
     # Acquisition successful: Y
 
-    client.publish("rpi", str(["RECONNECTING"]))
     stop_devices(devices)
     write_summary_file(a_file.name)
     a_file.close()
@@ -139,77 +132,3 @@ def kill_case_7(devices, a_file):
     write_summary_file(a_file.name)
     a_file.close()
     kill_subprocess()
-
-
-# def error_kill(
-#     client,
-#     devices,
-#     msg,
-#     mqtt_msg="ERROR",
-#     a_file=None,
-#     files_open=True,
-#     devices_connected=True,
-# ):
-
-#     config_debug.log(msg)
-#     client.publish("rpi", str([mqtt_msg]))
-#     client.loop_stop()
-#     client.keepAlive = False
-
-#     # Disconnect the system
-#     disconnect_system(devices, a_file, files_open, devices_connected)
-
-#     pid = subprocess.run(
-#         ["sudo", "pgrep", "python"], capture_output=True, text=True
-#     ).stdout.split("\n")[:-1]
-#     for p in pid:
-#         subprocess.run(["kill", "-9", p])
-
-#     config_debug.log("killed")
-
-
-# def error_disconnect(client, devices, msg, a_file=None, files_open=True):
-
-#     config_debug.log("The system has stopped running because " + str(msg))
-#     client.publish("rpi", str(["RECONNECTING"]))
-
-#     # Disconnect the system
-#     write_summary_file(a_file.name)
-#     disconnect_system(devices, a_file, files_open)
-
-#     devices = []
-#     system_started = False
-
-#     return devices, system_started
-
-
-# def kill_after_duration(client, devices, a_file=None, files_open=True):
-
-#     client.publish("rpi", str(["STOPPED"]))
-#     client.loop_stop()
-
-#     # Disconnect the system
-#     write_summary_file(a_file.name)
-#     disconnect_system(devices, a_file, files_open)
-
-#     pid = subprocess.run(
-#         ["sudo", "pgrep", "python"], capture_output=True, text=True
-#     ).stdout.split("\n")[:-1]
-#     for p in pid:
-#         subprocess.run(["kill", "-9", p])
-
-
-# def client_kill(client, devices, msg, a_file=None, files_open=True):
-
-#     config_debug.log(msg)
-#     client.publish("rpi", str(["STOPPED"]))
-#     client.loop_stop()
-
-#     # Disconnect the system
-#     disconnect_system(devices, a_file, files_open)
-
-#     pid = subprocess.run(
-#         ["sudo", "pgrep", "python"], capture_output=True, text=True
-#     ).stdout.split("\n")[:-1]
-#     for p in pid:
-#         subprocess.run(["kill", "-9", p])

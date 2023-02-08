@@ -2,9 +2,8 @@
 import json
 
 # local
-from epibox.bit.manage_devices import pause_devices, connect_devices, start_devices
+from epibox.bit.manage_devices import connect_devices, start_devices
 from epibox.exceptions.exception_manager import (
-    client_kill,
     handle_case_6,
     kill_case_1,
     kill_case_2,
@@ -107,36 +106,28 @@ def main():
 
     config_debug.log("Initial setup complete!")
 
-    try:
-        # Open acquisition file | get format and header info ============================================
-        a_file, save_fmt, header = open_file(
-            directory, devices, channels, sensors, opt["fs"], save_raw, service
-        )
-        files_open = True
-
-    except OSError as e:
-        config_debug.log(e)
-        kill_case_3(client, devices)
-
-    # Starting acquisition loop ===========================================================================
-    # This loop runs continuously unless the user stops the acquisition on the EpiBOX App or at least one of
-    # the devices disconnects
     while client.keepAlive:
 
         try:
 
             if client.newAnnot != None:
                 # Write user annotation to file if one is received via MQTT ===============================
+                # TODO exception handling
                 config_debug.log(f"annot: {client.newAnnot}")
                 write_annot_file(a_file.name, client.newAnnot)
                 client.newAnnot = None
 
             if client.pauseAcq and not already_notified_pause:
                 # Pause acquisition if command is received via MQTT ========================================
-                devices = pause_devices(client, devices)
+
+                # devices = pause_devices(client, devices)
+                system_started = handle_case_6(devices, a_file, system_started)
+                message_info = client.publish("rpi", str(["PAUSED"]))
+                if message_info.rc == 4:
+                    raise MQTTConnectionError
                 already_notified_pause = True
 
-            else:
+            if not client.pauseAcq:
 
                 if already_notified_pause:
                     message_info = client.publish("rpi", str(["RECONNECTING"]))
@@ -146,6 +137,15 @@ def main():
 
                 if not system_started:
                     # If the devices have not yet started acquiring or they are paused, start acquisition
+                    a_file, save_fmt, header = open_file(
+                        directory,
+                        devices,
+                        channels,
+                        sensors,
+                        opt["fs"],
+                        save_raw,
+                        service,
+                    )
                     sync_param = start_devices(
                         client, devices, opt["fs"], channels, header
                     )
@@ -168,7 +168,7 @@ def main():
                     client,
                 )
 
-                # Subsample batch of samples and send to the EpiBOX App for visualization purposes ==========
+                # Subsample batch of samples and send to the EpiBOX App for visualization purposes ================
                 t_display = process_data.decimate(t_disp, opt["fs"])
                 t_all += t_display[0]
                 json_data = json.dumps(["DATA", t_display, channels, sensors])
@@ -177,25 +177,6 @@ def main():
                     raise MQTTConnectionError
 
                 already_timed_out = False
-
-                # # Handle misconnection of the devices ============================================================
-                # except Exception as e:
-                #     devices, system_started = error_disconnect(
-                #         client, devices, e, a_file
-                #     )
-                #     devices = connect_devices(
-                #         client, devices, opt, already_timed_out, a_file
-                #     )
-                #     system_started = False
-                #     a_file, save_fmt, header = open_file(
-                #         directory,
-                #         devices,
-                #         channels,
-                #         sensors,
-                #         opt["fs"],
-                #         save_raw,
-                #         service,
-                #     )
 
         except (
             DeviceNotIDLEError,
@@ -210,7 +191,10 @@ def main():
 
         except DeviceNotInAcquisitionError as e:
             config_debug.log(e)
-            system_started = handle_case_6(client, devices, a_file, system_started)
+            message_info = client.publish("rpi", str(["RECONNECTING"]))
+            if message_info.rc == 4:
+                raise MQTTConnectionError
+            system_started = handle_case_6(devices, a_file, system_started)
             continue
 
         except MQTTConnectionError as e:

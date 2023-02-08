@@ -57,9 +57,7 @@ def header2bitalino(
 
         if save_raw:
             mac_dict[device.macAddress]["label"] = [
-                "RAW"
-                for i, elem in enumerate(mac_channels)
-                if elem[0] == device.macAddress
+                "RAW" for elem in mac_channels if elem[0] == device.macAddress
             ]
         else:
             mac_dict[device.macAddress]["label"] = [
