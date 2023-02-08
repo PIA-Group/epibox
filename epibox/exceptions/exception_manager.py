@@ -52,7 +52,6 @@ def kill_case_1():
     # Devices open: N
     # File open: N
     # Devices started: N
-    # Acquisition successful: N
 
     kill_subprocess()
 
@@ -62,7 +61,6 @@ def kill_case_2(client):
     # Devices open: N
     # File open: N
     # Devices started: N
-    # Acquisition successful: N
 
     kill_client(client)
     kill_subprocess()
@@ -73,7 +71,6 @@ def kill_case_3(client, devices):
     # Devices open: Y (might not be true for all devices)
     # File open: N
     # Devices started: N
-    # Acquisition successful: N
 
     close_devices(devices)
     kill_client(client)
@@ -85,7 +82,6 @@ def kill_case_4(devices):
     # Devices open: Y (might not be true for all devices)
     # File open: N
     # Devices started: N
-    # Acquisition successful: N
 
     close_devices(devices)
     kill_subprocess()
@@ -96,7 +92,6 @@ def kill_case_5(client, devices, a_file):
     # Devices open: Y (might not be true for all devices)
     # File open: Y
     # Devices started: Y (might not be true for all devices)
-    # Acquisition successful: Y
     stop_devices(devices)
     close_devices(devices)
     write_summary_file(a_file.name)
@@ -110,7 +105,6 @@ def handle_case_6(devices, a_file, system_started):
     # Devices open: Y
     # File open: Y
     # Devices started: N (might not be true for all devices)
-    # Acquisition successful: Y
 
     stop_devices(devices)
     write_summary_file(a_file.name)
@@ -125,7 +119,6 @@ def kill_case_7(devices, a_file):
     # Devices open: Y
     # File open: Y
     # Devices started: Y
-    # Acquisition successful: Y
 
     stop_devices(devices)
     close_devices(devices)

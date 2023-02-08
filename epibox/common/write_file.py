@@ -1,19 +1,15 @@
 # built-in
 from datetime import datetime
-from distutils.log import debug
 import os
 
 # third-party
 import numpy as np
 
+# local
 from epibox import config_debug
 
 
-def write_file(t, a_file, sync_param, time, fmt):
-    write_acq_file(a_file, t, time, fmt)
-
-
-def write_acq_file(a_file, t, time, fmt):
+def write_acq_file(a_file, t, fmt):
     np.savetxt(
         a_file,
         t,
@@ -24,19 +20,6 @@ def write_acq_file(a_file, t, time, fmt):
         footer="",
         comments="",
     )
-
-
-def write_drift_log(filename, sync_param):
-
-    sync_time = sync_param["sync_time"]
-
-    if not sync_param["mode"]:
-        filename.write("%s" % sync_time + "\n")
-        sync_param["mode"] = 1
-    else:
-        filename.write("\n")
-
-    # config_debug.log(('%s' % '  ' + sync_time))
 
 
 def write_annot_file(recording_name, annot):

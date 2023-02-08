@@ -3,7 +3,6 @@ from http import client
 import time
 import pwd
 import os
-import ast
 
 # third-party
 import paho.mqtt.client as mqtt
@@ -91,7 +90,7 @@ def setup_config(client):
     opt["devices_mac"] = [m for m in opt["devices_mac"].values() if m != ""]
 
     # check if default storage is available | if not, terminate setup loop and acquisition
-    opt = check_storage(client, [], opt)
+    opt = check_storage(client, opt)
 
     config_debug.log("ID: {}".format(opt["patient_id"]))
     config_debug.log("folder: {}".format(opt["initial_dir"]))
@@ -115,7 +114,7 @@ def setup_variables():
     return t_all, already_notified_pause, system_started, files_open
 
 
-def check_storage(client, devices, opt):
+def check_storage(client, opt):
     # Check if default storage is available | loop runs continuosly until it find the storage or until timeout
     # If timeout, setup loop and acquisition are terminated
 

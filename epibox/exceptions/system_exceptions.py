@@ -4,12 +4,6 @@ class Error(Exception):
     pass
 
 
-class ConnectionBad(Error):
-    """Raised when the input value is too small"""
-
-    pass
-
-
 class MQTTConnectionError(Error):
     """Client is not currently connected."""
 

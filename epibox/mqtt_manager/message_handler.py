@@ -9,7 +9,7 @@ import pwd
 # local
 from epibox import config_debug
 from epibox.common.get_defaults import get_default
-from epibox.exceptions.system_exceptions import ExceptionCode, MQTTConnectionError
+from epibox.exceptions.system_exceptions import MQTTConnectionError
 
 
 def send_default(client, username):

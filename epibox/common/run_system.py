@@ -9,7 +9,7 @@ from epibox import config_debug
 
 # local
 from epibox.common.read_modules import read_modules
-from epibox.common.write_file import write_file
+from epibox.common.write_file import write_acq_file, write_file
 from epibox.exceptions.exception_manager import kill_after_duration
 
 
@@ -17,12 +17,8 @@ def run_system(
     devices,
     a_file,
     sync_param,
-    directory,
     mac_channels,
     sensors,
-    fs,
-    save_raw,
-    service,
     save_fmt,
     header,
     client,
@@ -50,7 +46,7 @@ def run_system(
     sys.stdout.flush()
 
     # Write batch of samples to file
-    write_file(t, a_file, sync_param, str(i), save_fmt)
+    write_acq_file(a_file, t, save_fmt)
 
     # Open new file each hour
     if sync_param["close_file"] == 1:
