@@ -5,22 +5,35 @@ import subprocess
 import json
 import shutil
 import pwd
+from sys import platform
 
 # local
 from epibox import config_debug
 from epibox.common.get_defaults import get_default
-from epibox.exceptions.system_exceptions import MQTTConnectionError
+from epibox.exceptions.system_exceptions import (
+    MQTTConnectionError,
+    PlatformNotSupportedError,
+)
 
 
 def send_default(client, username):
 
     ######## Available drives ########
 
+    if platform == "linux" or platform == "linux2":
+        # linux
+        drive_path = f"/media/{username}"
+    elif platform == "darwin":
+        # macos
+        drive_path = "/Volumes"
+    else:
+        raise PlatformNotSupportedError
+
     listDrives = ["DRIVES"]
-    drives = os.listdir("/media/{}/".format(username))
+    drives = os.listdir(f"/{drive_path}/")
 
     for drive in drives:
-        total, _, free = shutil.disk_usage("/media/{}/{}".format(username, drive))
+        total, _, free = shutil.disk_usage(f"/{drive_path}/{drive}")
         listDrives += ["{} ({:.1f}% livre)".format(drive, (free / total) * 100)]
 
     message_info = client.publish(

@@ -38,3 +38,9 @@ class DeviceNotIDLEError(Error):
     """Device not IDLE."""
 
     pass
+
+
+class PlatformNotSupportedError(Error):
+    """Platform not supported"""
+
+    pass

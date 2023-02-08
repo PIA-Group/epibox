@@ -25,6 +25,7 @@ from epibox.exceptions.system_exceptions import (
     DeviceNotIDLEError,
     DeviceNotInAcquisitionError,
     MQTTConnectionError,
+    PlatformNotSupportedError,
     StorageTimeout,
 )
 
@@ -63,7 +64,6 @@ def main():
             t_all,
             already_notified_pause,
             system_started,
-            files_open,
         ) = setup_variables()  # raises no errors
 
         # Create folder with patient ID
@@ -79,6 +79,7 @@ def main():
         TypeError,
         OSError,
         StorageTimeout,
+        PlatformNotSupportedError,
     ) as e:
         config_debug.log(e)
         kill_case_2(client)
@@ -98,7 +99,7 @@ def main():
         BITalinoParameterError,
     ) as e:
         config_debug.log(e)
-        kill_case_3(client, devices, a_file)
+        kill_case_3(client, devices)
 
     except MQTTConnectionError as e:
         config_debug.log(e)

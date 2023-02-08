@@ -1,6 +1,6 @@
 # built-in
 import subprocess
-import time
+import sys
 
 # local
 from epibox.common.write_file import write_summary_file
@@ -10,11 +10,12 @@ from epibox import config_debug
 def kill_subprocess():
 
     config_debug.log("  -- killing subprocess --")
-    pid = subprocess.run(
-        ["sudo", "pgrep", "python"], capture_output=True, text=True
-    ).stdout.split("\n")[:-1]
-    for p in pid:
-        subprocess.run(["kill", "-9", p])
+    sys.exit()
+    # pid = subprocess.run(
+    #     ["sudo", "pgrep", "python"], capture_output=True, text=True
+    # ).stdout.split("\n")[:-1]
+    # for p in pid:
+    #     subprocess.run(["kill", "-9", p])
 
 
 def kill_client(client):

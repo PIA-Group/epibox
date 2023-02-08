@@ -1,19 +1,34 @@
 import json
 import ast
 import os
+import pwd
+from sys import platform
+
+# local
+from epibox.exceptions.system_exceptions import PlatformNotSupportedError
 
 
 def get_default(username):
 
-    if os.path.isfile("/home/{}/Documents/epibox/args.json".format(username)):
+    username = pwd.getpwuid(os.getuid())[0]
 
-        with open(
-            "/home/{}/Documents/epibox/args.json".format(username), "r"
-        ) as json_file:
+    if platform == "linux" or platform == "linux2":
+        # linux
+        defaults_path = f"/home/{username}/Documents/epibox/args.json"
+    elif platform == "darwin":
+        # macos
+        defaults_path = "/Users/anasofiacc/Documents/epibox/args.json"
+    else:
+        raise PlatformNotSupportedError
+
+    if os.path.isfile(defaults_path):
+
+        with open(defaults_path, "r") as json_file:
             defaults = json_file.read()
             defaults = ast.literal_eval(defaults)
 
     else:  # the first time using EpiBOX Core, there will be no default file
+        os.makedirs(os.path.dirname(defaults_path))
         defaults = {
             "initial_dir": "EpiBOX Core",
             "fs": 1000,
@@ -24,9 +39,7 @@ def get_default(username):
             "service": "Bitalino",
         }
 
-    with open(
-        "/home/{}/Documents/epibox/args.json".format(username), "w+"
-    ) as json_file:
+    with open(defaults_path, "w+") as json_file:
         json.dump(defaults, json_file)
 
     return defaults

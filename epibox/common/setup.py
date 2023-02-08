@@ -1,13 +1,17 @@
 # built-in
-from http import client
 import time
 import pwd
 import os
+from sys import platform
 
 # third-party
 import paho.mqtt.client as mqtt
 from epibox.common.get_defaults import get_default
-from epibox.exceptions.system_exceptions import MQTTConnectionError, StorageTimeout
+from epibox.exceptions.system_exceptions import (
+    MQTTConnectionError,
+    PlatformNotSupportedError,
+    StorageTimeout,
+)
 
 # local
 from epibox.mqtt_manager.message_handler import on_message, send_default
@@ -108,10 +112,9 @@ def setup_variables():
 
     already_notified_pause = False
     system_started = False
-    files_open = False
     t_all = []
 
-    return t_all, already_notified_pause, system_started, files_open
+    return t_all, already_notified_pause, system_started
 
 
 def check_storage(client, opt):
@@ -119,6 +122,15 @@ def check_storage(client, opt):
     # If timeout, setup loop and acquisition are terminated
 
     username = pwd.getpwuid(os.getuid())[0]
+
+    if platform == "linux" or platform == "linux2":
+        # linux
+        drive_path = f"/media/{username}"
+    elif platform == "darwin":
+        # macos
+        drive_path = "/Volumes"
+    else:
+        raise PlatformNotSupportedError
 
     init_connect_time = time.time()
     config_debug.log(f'Searching for storage module: {opt["initial_dir"]}')
@@ -128,9 +140,9 @@ def check_storage(client, opt):
         if (time.time() - init_connect_time) > 120:
             raise StorageTimeout
 
-        if os.path.isdir("/media/{}/".format(username) + opt["initial_dir"]):
+        if os.path.isdir(f"/{drive_path}/" + opt["initial_dir"]):
             opt["initial_dir"] = (
-                "/media/{}/".format(username) + opt["initial_dir"] + "/acquisitions"
+                f"/{drive_path}/" + opt["initial_dir"] + "/acquisitions"
             )
             break
 

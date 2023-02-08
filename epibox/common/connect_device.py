@@ -1,7 +1,3 @@
-# built-in
-import string
-import random
-
 # third-party
 import bitalino
 

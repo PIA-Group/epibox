@@ -5,12 +5,10 @@ from datetime import datetime
 
 # third-party
 import numpy as np
-from epibox import config_debug
 
 # local
 from epibox.common.read_modules import read_modules
-from epibox.common.write_file import write_acq_file, write_file
-from epibox.exceptions.exception_manager import kill_after_duration
+from epibox.common.write_file import write_acq_file
 
 
 def run_system(
@@ -47,10 +45,5 @@ def run_system(
 
     # Write batch of samples to file
     write_acq_file(a_file, t, save_fmt)
-
-    # Open new file each hour
-    if sync_param["close_file"] == 1:
-        # TODO not working
-        kill_after_duration(client, devices, a_file)
 
     return t, t_display, a_file, sync_param
