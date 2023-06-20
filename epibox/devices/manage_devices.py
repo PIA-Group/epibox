@@ -80,7 +80,7 @@ def start_devices(client, devices, fs, mac_channels, header):
 
 
 def connect_devices(
-    client, devices, opt, already_timed_out, a_file=None, files_open=True
+    client, devices, opt, already_timed_out,
 ):
 
     # This script attempts to connect to the default biosignal acquisition devices in a continuous loop.

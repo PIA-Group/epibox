@@ -88,7 +88,7 @@ def main():
     # Start loop to connect PyEpiBOX to acquisition devices =========================================
     try:
         devices = connect_devices(  # exceptions handled inside
-            client, devices, opt, already_timed_out, files_open=False
+            client, devices, opt, already_timed_out,
         )
 
     except (

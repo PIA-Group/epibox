@@ -27,13 +27,15 @@ def setup_client():
     host_name = "192.168.0.10"
     topic = "rpi"
 
-    client = mqtt.Client(client_name)  # raises ValueError and ConnectionRefusedError
+    # raises ValueError and ConnectionRefusedError
+    client = mqtt.Client(client_name)
 
     setattr(client, "keepAlive", True)
     setattr(client, "pauseAcq", False)
     setattr(client, "newAnnot", None)
 
-    client.username_pw_set(username="preepiseizures", password="preepiseizures")
+    client.username_pw_set(username="preepiseizures",
+                           password="preepiseizures")
     client.connect(host_name)  # raises ValueError
     client.subscribe(topic)  # raises ValueError
     client.on_message = on_message
@@ -56,7 +58,7 @@ def setup_config(client):
 
     # inform the EpiBOX App which are the current default devices
     send_default(client, username)
-    opt = get_default(username)
+    opt = get_default()
 
     if not opt["channels"]:
         # if default "channels" is empty, acquire all
