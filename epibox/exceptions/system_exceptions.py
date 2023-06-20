@@ -34,6 +34,12 @@ class ScientISSTConnectionError(Error):
     pass
 
 
+class ScientISSTNotFound(Error):
+    """ScientISST device not paired."""
+
+    pass
+
+
 class DeviceNotInAcquisitionError(Error):
     """Device not in acquisition."""
 

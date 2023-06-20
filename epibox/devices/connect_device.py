@@ -1,6 +1,7 @@
 # third-party
 import bitalino
 import scientisst
+from serial.tools.list_ports import comports
 
 # local
 from epibox import config_debug
@@ -8,6 +9,7 @@ from epibox.exceptions.system_exceptions import (
     BITalinoParameterError,
     MQTTConnectionError,
     ScientISSTConnectionError,
+    ScientISSTNotFound,
 )
 
 
@@ -30,22 +32,20 @@ def connect_device(address, client, devices, service):
     else:
 
         if service == "bitalino":
-            try:
-                device = bitalino.BITalino(address, timeout=5)
-                devices += [device]
-
-            except Exception as e:
-                config_debug.log(e)
-                raise BITalinoParameterError
+            device = bitalino.BITalino(address, timeout=5)
+            devices += [device]
 
         elif service == "scientisst":
-            try:
-                device = scientisst.ScientISST(address)
-                devices += [device]
+            ports = comports()
+            address = [port.device for port in ports if address in port.device]
 
-            except Exception as e:
-                config_debug.log(e)
-                raise ScientISSTConnectionError
+            if address == []:
+                raise ScientISSTNotFound
+            else:
+                address = address[0]
+
+            device = scientisst.ScientISST(address)
+            devices += [device]
 
     devices = [d for d in devices if d]  # remove None
 

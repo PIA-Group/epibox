@@ -10,14 +10,12 @@ from epibox.exceptions.system_exceptions import PlatformNotSupportedError
 
 def get_default(username):
 
-    username = pwd.getpwuid(os.getuid())[0]
-
     if platform == "linux" or platform == "linux2":
         # linux
         defaults_path = f"/home/{username}/Documents/epibox/args.json"
     elif platform == "darwin":
         # macos
-        defaults_path = "/Users/anasofiacc/Documents/epibox/args.json"
+        defaults_path = f"/Users/{username}/Docs/epibox/args.json"
     else:
         raise PlatformNotSupportedError
 
@@ -33,10 +31,10 @@ def get_default(username):
             "initial_dir": "EpiBOX Core",
             "fs": 1000,
             "channels": [],
-            "devices_mac": {"MAC1": "12:34:56:78:91:10", "MAC2": "01:19:87:65:43:21"},
+            "devices_mac": {"MAC1": "ScientISST-32-16"},
             "save_raw": "true",
             "patient_id": "default",
-            "service": "Bitalino",
+            "service": "scientisst",
         }
 
     with open(defaults_path, "w+") as json_file:

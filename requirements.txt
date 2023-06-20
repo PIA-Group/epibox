@@ -1,7 +1,0 @@
-bitalino==1.2.1
-numpy==1.21.0
-paho-mqtt==1.5.1
-pyserial==3.5
-pybluez==0.41; sys_platform != 'darwin'
-scientisst-sense==1.0.4
-scipy

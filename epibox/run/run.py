@@ -67,7 +67,8 @@ def main():
         ) = setup_variables()  # raises no errors
 
         # Create folder with patient ID
-        directory = create_folder(opt["initial_dir"], "{}".format(opt["patient_id"]))
+        directory = create_folder(
+            opt["initial_dir"], "{}".format(opt["patient_id"]))
 
     except MQTTConnectionError as e:
         kill_case_1()

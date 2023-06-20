@@ -39,8 +39,9 @@ setup(
         "paho-mqtt==1.5.1",
         "pyserial==3.5",
         "pybluez==0.41; sys_platform != 'darwin'",
-        "scientisst-sense==1.0.4",
+        "scientisst-sense==1.0.5",
         "scipy",
+        "bump"
     ],
     license="MIT license",
     long_description_content_type="text/markdown",
@@ -52,6 +53,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/anascacais/epibox",
-    version="1.1.11",
+    version="1.2.8",
     zip_safe=False,
 )

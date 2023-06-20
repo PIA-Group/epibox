@@ -48,10 +48,10 @@ def get_header(
         header_dict[device.macAddress]["date"] = file_date
         # header_dict[device.macAddress]["firmware version"] = device.version()
 
-        if service == "Bitalino":
+        if service == "bitalino":
             header_dict[device.macAddress]["device"] = "bitalino_rev"
             aux = [10, 10, 10, 10, 6, 6]  # resolution
-        elif service == "ScientISST":
+        elif service == "scientisst":
             header_dict[device.macAddress]["device"] = "scientisst_sense"
             aux = [12, 12, 12, 12, 12, 12]
         else:

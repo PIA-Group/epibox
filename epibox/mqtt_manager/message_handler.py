@@ -34,7 +34,8 @@ def send_default(client, username):
 
     for drive in drives:
         total, _, free = shutil.disk_usage(f"/{drive_path}/{drive}")
-        listDrives += ["{} ({:.1f}% livre)".format(drive, (free / total) * 100)]
+        listDrives += ["{} ({:.1f}% livre)".format(drive,
+                                                   (free / total) * 100)]
 
     message_info = client.publish(
         topic="rpi", qos=2, payload="{}".format(listDrives)
@@ -46,12 +47,11 @@ def send_default(client, username):
 
     defaults = get_default(username)
     listMAC = defaults["devices_mac"]
-    listMAC2 = json.dumps(
-        [
-            "DEFAULT MAC",
-            "{}".format(list(listMAC.values())[0]),
-            "{}".format(list(listMAC.values())[1]),
-        ]
+    listMAC2 = json.dumps(["DEFAULT MAC"] +
+                          [
+
+        "{}".format(address) for address in list(listMAC.values())
+    ]
     )
 
     message_info = client.publish(
@@ -92,7 +92,8 @@ def on_message(client, userdata, message):
         client.pauseAcq = False
 
     elif message[0] == "ANNOTATION":
-        config_debug.log("RECEIVED ANNOT {} ----------------------".format(message[1]))
+        config_debug.log(
+            "RECEIVED ANNOT {} ----------------------".format(message[1]))
         client.newAnnot = message[1]
 
     elif message[0] == "TURN OFF":

@@ -16,6 +16,7 @@ from epibox.exceptions.system_exceptions import (
     DeviceNotIDLEError,
     DeviceNotInAcquisitionError,
     MQTTConnectionError,
+    ScientISSTNotFound,
 )
 
 
@@ -42,7 +43,8 @@ def start_devices(client, devices, fs, mac_channels, header):
     # mode: 0 if not started acquisition yet (or if paused) and 1 otherwise (used to write in drift_log_file)
 
     for i in range(len(devices)):
-        sync_param["sync_arr_" + chr(ord("@") + i + 1)] = np.zeros(1000, dtype=float)
+        sync_param["sync_arr_" + chr(ord("@") + i + 1)
+                   ] = np.zeros(1000, dtype=float)
 
     # Initialize devices
     for device in devices:
@@ -123,9 +125,21 @@ def connect_devices(
 
                 continue
 
+            except ScientISSTNotFound as e:
+                time.sleep(2)
+                config_debug.log(f"Connection refused: {e}")
+                if not already_timed_out and (time.time() - init_connect_time > 3 * i):
+                    timeout_json = json.dumps(["TIMEOUT", "{}".format(mac)])
+                    message_info = client.publish("rpi", timeout_json)
+                    if message_info.rc == 4:
+                        raise MQTTConnectionError
+                    already_timed_out = True
+
+                continue
+
             except Exception as e:
                 time.sleep(2)
-                config_debug.log(f"Bluetooth connection refused: {e}")
+                config_debug.log(f"Connection refused: {e}")
                 if not already_timed_out and (time.time() - init_connect_time > 3 * i):
                     timeout_json = json.dumps(["TIMEOUT", "{}".format(mac)])
                     message_info = client.publish("rpi", timeout_json)
