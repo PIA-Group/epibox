@@ -4,12 +4,12 @@ from datetime import datetime
 import json
 
 # third-party
+
 import numpy as np
 import serial
-import bluetooth
 
 # local
-from epibox.common.connect_device import connect_device
+from epibox.devices.connect_device import connect_device
 from epibox import config_debug
 from epibox.exceptions.system_exceptions import (
     DeviceConnectionTimeout,
@@ -47,7 +47,7 @@ def start_devices(client, devices, fs, mac_channels, header):
     # Initialize devices
     for device in devices:
 
-        if header["service"] == "Bitalino" or header["service"] == "Mini":
+        if header["service"] == "Bitalino":
             channels = [
                 int(elem[1]) - 1
                 for elem in mac_channels
@@ -98,7 +98,9 @@ def connect_devices(
 
             try:
                 connected = False
-                connected, devices = connect_device(mac, client, devices)
+                connected, devices = connect_device(
+                    mac, client, devices, opt["service"]
+                )
 
                 if not (connected and mac in [d.macAddress for d in devices]):
                     if time.time() - init_connect_time > 3 * i:
@@ -121,7 +123,7 @@ def connect_devices(
 
                 continue
 
-            except bluetooth.btcommon.BluetoothError as e:
+            except Exception as e:
                 time.sleep(2)
                 config_debug.log(f"Bluetooth connection refused: {e}")
                 if not already_timed_out and (time.time() - init_connect_time > 3 * i):

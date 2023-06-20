@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 
 # local
-from epibox.bit.header2bitalino import header2bitalino
+from epibox.devices.header import get_header
 
 
 def open_file(directory, devices, mac_channels, sensors, fs, save_raw, service):
@@ -16,10 +16,11 @@ def open_file(directory, devices, mac_channels, sensors, fs, save_raw, service):
     file_time = '"' + file_time + '"'
     file_date = '"' + save_time[0:10] + '"'
 
-    a_file = open(os.path.join(directory, "A" + save_time + ".txt"), "w")  # data file
+    a_file = open(os.path.join(directory, "A" +
+                  save_time + ".txt"), "w")  # data file
 
     # create header for the acquisition file
-    save_fmt, header = header2bitalino(
+    save_fmt, header = get_header(
         a_file,
         file_time,
         file_date,

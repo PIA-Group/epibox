@@ -2,7 +2,7 @@
 import json
 
 # local
-from epibox.bit.manage_devices import connect_devices, start_devices
+from epibox.devices.manage_devices import connect_devices, start_devices
 from epibox.exceptions.exception_manager import (
     handle_case_6,
     kill_case_1,
@@ -67,9 +67,7 @@ def main():
         ) = setup_variables()  # raises no errors
 
         # Create folder with patient ID
-        directory = create_folder(
-            opt["initial_dir"], "{}".format(opt["patient_id"]), service
-        )
+        directory = create_folder(opt["initial_dir"], "{}".format(opt["patient_id"]))
 
     except MQTTConnectionError as e:
         kill_case_1()

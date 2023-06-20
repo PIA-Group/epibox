@@ -48,6 +48,17 @@ def stop_devices(devices):
 # Kill and error handling cases ===========================================================================
 
 
+# | | __client__ | __devices open__ | __file open__ | __devices started__ | __acquired__|
+# |:---: | :---: | :----: | :---: | :---: | :---: |
+# |__kill 1__ | N | N | N | N | N |
+# |__kill 2__ | Y | N | N | N | N |
+# |__kill 3__ | Y | Y - | N | N | N |
+# |__kill 4__ | N | Y - | N | N | N |
+# |__kill 5__ | Y | Y - | Y | Y - | Y |
+# |__handle 6__ | Y | Y | Y | N - | Y |
+# |__kill 7__ | N | Y | Y | Y | Y |
+
+
 def kill_case_1():
     # Client: N
     # Devices open: N

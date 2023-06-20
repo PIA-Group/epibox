@@ -28,6 +28,12 @@ class BITalinoParameterError(Error):
     pass
 
 
+class ScientISSTConnectionError(Error):
+    """Error raised while connecting to ScientISST device due to loss of comnmunication."""
+
+    pass
+
+
 class DeviceNotInAcquisitionError(Error):
     """Device not in acquisition."""
 
