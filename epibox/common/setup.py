@@ -1,6 +1,5 @@
 # built-in
 import time
-import pwd
 import os
 from sys import platform
 
@@ -13,8 +12,6 @@ from epibox.exceptions.system_exceptions import (
 )
 
 # local
-from epibox.mqtt_manager.message_handler import on_message, send_default
-from epibox.mqtt_manager.utils import random_str
 from epibox import config_debug
 
 
@@ -22,7 +19,6 @@ from epibox import config_debug
 def setup_config():
     # Access default configurations on EpiBOX Core and save them to variables ======================
 
-    username = pwd.getpwuid(os.getuid())[0]
 
     # inform the EpiBOX App which are the current default devices
     opt = get_default()
@@ -89,16 +85,20 @@ def check_storage(opt):
     # Check if default storage is available | loop runs continuosly until it find the storage or until timeout
     # If timeout, setup loop and acquisition are terminated
 
-    username = pwd.getpwuid(os.getuid())[0]
 
     if platform == "linux" or platform == "linux2":
         # linux
-        drive_path = f"/media/{username}"
+        drive_path = f"/media/{os.environ.get('USERNAME')}"
     elif platform == "darwin":
         # macos
         drive_path = "/Volumes"
     else:
-        raise PlatformNotSupportedError
+        # import win32api
+        # import win32con
+        # import win32file
+        # drives = [i for i in win32api.GetLogicalDriveStrings().split('\x00') if i]
+        # drive_path = [d for d in drives if win32file.GetDriveType(d) == win32con.DRIVE_REMOVABLE]
+        drive_path = ""
 
     init_connect_time = time.time()
     config_debug.log(f'Searching for storage module: {opt["initial_dir"]}')

@@ -5,17 +5,15 @@ import json
 from epibox.devices.manage_devices import connect_devices, start_devices
 from epibox.exceptions.exception_manager import (
     handle_case_6,
-    kill_case_1,
     kill_case_2,
     kill_case_3,
     kill_case_4,
     kill_case_5,
     kill_case_7,
 )
-from epibox.common.setup import setup_client, setup_config, setup_variables
+from epibox.common.setup import setup_config, setup_variables
 from epibox.common.create_folder import create_folder
 from epibox.common.open_file import open_file
-from epibox.common.write_file import write_annot_file
 from epibox.common.run_system import run_system
 from epibox.common import process_data
 from epibox import config_debug
@@ -48,7 +46,7 @@ from epibox.exceptions.system_exceptions import (
 
 class Client(object):
     def __init__(self):
-        self.keepAline = True
+        self.keepAlive = True
 
 def main():
 
