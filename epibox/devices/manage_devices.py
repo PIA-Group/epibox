@@ -20,7 +20,7 @@ from epibox.exceptions.system_exceptions import (
 )
 
 
-def start_devices(client, devices, fs, mac_channels, header):
+def start_devices(devices, fs, mac_channels, header):
 
     # Start acquisition with the biosignal acquisition devices, considering the chosen sampling ferquency
     # and channels
@@ -72,16 +72,12 @@ def start_devices(client, devices, fs, mac_channels, header):
     config_debug.log("start {now}")
     sync_param["sync_time"] = now.strftime("%Y-%m-%d %H:%M:%S.%f")
 
-    message_info = client.publish("rpi", str(["ACQUISITION ON"]))
-    if message_info.rc == 4:  # MQTT_ERR_NO_CONN
-        raise MQTTConnectionError
-
     return sync_param
 
 
 def connect_devices(
-    client, devices, opt, already_timed_out,
-):
+    devices, opt
+    ):
 
     # This script attempts to connect to the default biosignal acquisition devices in a continuous loop.
     # The loop stops only if:
@@ -101,52 +97,23 @@ def connect_devices(
             try:
                 connected = False
                 connected, devices = connect_device(
-                    mac, client, devices, opt["service"]
+                    mac, devices, opt["service"]
                 )
 
-                if not (connected and mac in [d.macAddress for d in devices]):
-                    if time.time() - init_connect_time > 3 * i:
-                        timeout_json = json.dumps(
-                            ["TRYING TO CONNECT", "{}".format(mac)]
-                        )
-                        message_info = client.publish("rpi", timeout_json)
-                        if message_info.rc == 4:
-                            raise MQTTConnectionError
-
+               
             except serial.SerialException as e:
                 time.sleep(2)
                 config_debug.log(f"Serial connection refused: {e}")
-                if not already_timed_out and (time.time() - init_connect_time > 3 * i):
-                    timeout_json = json.dumps(["TIMEOUT", "{}".format(mac)])
-                    message_info = client.publish("rpi", timeout_json)
-                    if message_info.rc == 4:
-                        raise MQTTConnectionError
-                    already_timed_out = True
-
                 continue
 
             except ScientISSTNotFound as e:
                 time.sleep(2)
                 config_debug.log(f"Connection refused: {e}")
-                if not already_timed_out and (time.time() - init_connect_time > 3 * i):
-                    timeout_json = json.dumps(["TIMEOUT", "{}".format(mac)])
-                    message_info = client.publish("rpi", timeout_json)
-                    if message_info.rc == 4:
-                        raise MQTTConnectionError
-                    already_timed_out = True
-
                 continue
 
             except Exception as e:
                 time.sleep(2)
                 config_debug.log(f"Connection refused: {e}")
-                if not already_timed_out and (time.time() - init_connect_time > 3 * i):
-                    timeout_json = json.dumps(["TIMEOUT", "{}".format(mac)])
-                    message_info = client.publish("rpi", timeout_json)
-                    if message_info.rc == 4:
-                        raise MQTTConnectionError
-                    already_timed_out = True
-
                 continue
 
     return devices

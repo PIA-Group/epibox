@@ -68,24 +68,22 @@ def kill_case_1():
     kill_subprocess()
 
 
-def kill_case_2(client):
+def kill_case_2():
     # Client: Y
     # Devices open: N
     # File open: N
     # Devices started: N
 
-    kill_client(client)
     kill_subprocess()
 
 
-def kill_case_3(client, devices):
+def kill_case_3(devices):
     # Client: Y
     # Devices open: Y (might not be true for all devices)
     # File open: N
     # Devices started: N
 
     close_devices(devices)
-    kill_client(client)
     kill_subprocess()
 
 
@@ -99,7 +97,7 @@ def kill_case_4(devices):
     kill_subprocess()
 
 
-def kill_case_5(client, devices, a_file):
+def kill_case_5(devices, a_file):
     # Client: Y
     # Devices open: Y (might not be true for all devices)
     # File open: Y
@@ -108,7 +106,6 @@ def kill_case_5(client, devices, a_file):
     close_devices(devices)
     write_summary_file(a_file.name)
     a_file.close()
-    kill_client(client)
     kill_subprocess()
 
 

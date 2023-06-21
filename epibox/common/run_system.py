@@ -19,7 +19,6 @@ def run_system(
     sensors,
     save_fmt,
     header,
-    client,
 ):
 
     # Read batch of samples from the devices and save to the active session's file  ===============================

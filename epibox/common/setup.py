@@ -5,7 +5,6 @@ import os
 from sys import platform
 
 # third-party
-import paho.mqtt.client as mqtt
 from epibox.common.get_defaults import get_default
 from epibox.exceptions.system_exceptions import (
     MQTTConnectionError,
@@ -19,45 +18,13 @@ from epibox.mqtt_manager.utils import random_str
 from epibox import config_debug
 
 
-def setup_client():
-    # Set up MQTT client =========================================================================
 
-    client_name = random_str(6)
-    config_debug.log(f"Client name (acquisition): {client_name}")
-    host_name = "192.168.0.10"
-    topic = "rpi"
-
-    # raises ValueError and ConnectionRefusedError
-    client = mqtt.Client(client_name)
-
-    setattr(client, "keepAlive", True)
-    setattr(client, "pauseAcq", False)
-    setattr(client, "newAnnot", None)
-
-    client.username_pw_set(username="preepiseizures",
-                           password="preepiseizures")
-    client.connect(host_name)  # raises ValueError
-    client.subscribe(topic)  # raises ValueError
-    client.on_message = on_message
-    client.loop_start()
-    config_debug.log(f"Successfully subcribed to topic {topic}")
-
-    message_info = client.publish(
-        "rpi", str(["STARTING"])
-    )  # raises ValueError and TypeError
-    if message_info.rc == 4:
-        raise MQTTConnectionError
-
-    return client
-
-
-def setup_config(client):
+def setup_config():
     # Access default configurations on EpiBOX Core and save them to variables ======================
 
     username = pwd.getpwuid(os.getuid())[0]
 
     # inform the EpiBOX App which are the current default devices
-    send_default(client, username)
     opt = get_default()
 
     if not opt["channels"]:
@@ -96,7 +63,7 @@ def setup_config(client):
     opt["devices_mac"] = [m for m in opt["devices_mac"].values() if m != ""]
 
     # check if default storage is available | if not, terminate setup loop and acquisition
-    opt = check_storage(client, opt)
+    opt = check_storage(opt)
 
     config_debug.log("ID: {}".format(opt["patient_id"]))
     config_debug.log("folder: {}".format(opt["initial_dir"]))
@@ -112,14 +79,13 @@ def setup_config(client):
 
 def setup_variables():
 
-    already_notified_pause = False
     system_started = False
     t_all = []
 
-    return t_all, already_notified_pause, system_started
+    return t_all, system_started
 
 
-def check_storage(client, opt):
+def check_storage(opt):
     # Check if default storage is available | loop runs continuosly until it find the storage or until timeout
     # If timeout, setup loop and acquisition are terminated
 
@@ -147,11 +113,5 @@ def check_storage(client, opt):
                 f"/{drive_path}/" + opt["initial_dir"] + "/acquisitions"
             )
             break
-
-        else:
-            if time.time() - init_connect_time > 3 * i:
-                message_info = client.publish("rpi", str(["INSERT STORAGE"]))
-                if message_info.rc == 4:
-                    raise MQTTConnectionError
 
     return opt

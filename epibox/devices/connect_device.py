@@ -13,7 +13,7 @@ from epibox.exceptions.system_exceptions import (
 )
 
 
-def connect_device(address, client, devices, service):
+def connect_device(address, devices, service):
 
     connected = False
     devices = [d for d in devices if d]  # remove None
@@ -48,22 +48,5 @@ def connect_device(address, client, devices, service):
             devices += [device]
 
     devices = [d for d in devices if d]  # remove None
-
-    if not connected or address not in [d.address for d in devices]:
-        message_info = client.publish(
-            topic="rpi",
-            qos=2,
-            payload="['MAC STATE', '{}', '{}']".format(address, "failed"),
-        )
-        if message_info.rc == 4:
-            raise MQTTConnectionError
-    else:
-        message_info = client.publish(
-            topic="rpi",
-            qos=2,
-            payload="['MAC STATE', '{}', '{}']".format(address, "connected"),
-        )
-        if message_info.rc == 4:
-            raise MQTTConnectionError
 
     return connected, devices
