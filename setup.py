@@ -38,7 +38,7 @@ setup(
         "numpy==1.21.0",
         "paho-mqtt==1.5.1",
         "pyserial==3.5",
-        "pybluez==0.41; sys_platform != 'darwin'",
+        "pybluez2; sys_platform != 'darwin'",
         "scientisst-sense==1.0.5",
         "scipy",
         "bump"
