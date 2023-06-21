@@ -35,7 +35,8 @@ setup(
     },
     install_requires=[
         "bitalino==1.2.1",
-        "numpy==1.21.0",
+        "numpy==1.21.0; sys_platform != 'win32'",
+        "numpy; sys_platform == 'win32'",
         "paho-mqtt==1.5.1",
         "pyserial==3.5",
         "pybluez2; sys_platform != 'darwin'",
