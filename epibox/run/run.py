@@ -2,7 +2,7 @@
 import json
 
 # local
-from epibox.bit.manage_devices import connect_devices, start_devices
+from epibox.devices.manage_devices import connect_devices, start_devices
 from epibox.exceptions.exception_manager import (
     handle_case_6,
     kill_case_1,
@@ -68,8 +68,7 @@ def main():
 
         # Create folder with patient ID
         directory = create_folder(
-            opt["initial_dir"], "{}".format(opt["patient_id"]), service
-        )
+            opt["initial_dir"], "{}".format(opt["patient_id"]))
 
     except MQTTConnectionError as e:
         kill_case_1()
@@ -89,7 +88,7 @@ def main():
     # Start loop to connect PyEpiBOX to acquisition devices =========================================
     try:
         devices = connect_devices(  # exceptions handled inside
-            client, devices, opt, already_timed_out, files_open=False
+            client, devices, opt, already_timed_out,
         )
 
     except (

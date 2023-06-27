@@ -4,18 +4,19 @@ from datetime import datetime
 import json
 
 # third-party
+
 import numpy as np
 import serial
-import bluetooth
 
 # local
-from epibox.common.connect_device import connect_device
+from epibox.devices.connect_device import connect_device
 from epibox import config_debug
 from epibox.exceptions.system_exceptions import (
     DeviceConnectionTimeout,
     DeviceNotIDLEError,
     DeviceNotInAcquisitionError,
     MQTTConnectionError,
+    ScientISSTNotFound,
 )
 
 
@@ -42,24 +43,30 @@ def start_devices(client, devices, fs, mac_channels, header):
     # mode: 0 if not started acquisition yet (or if paused) and 1 otherwise (used to write in drift_log_file)
 
     for i in range(len(devices)):
-        sync_param["sync_arr_" + chr(ord("@") + i + 1)] = np.zeros(1000, dtype=float)
+        sync_param["sync_arr_" + chr(ord("@") + i + 1)
+                   ] = np.zeros(1000, dtype=float)
 
     # Initialize devices
     for device in devices:
 
-        if header["service"] == "Bitalino" or header["service"] == "Mini":
+        if header["service"] == "bitalino":
             channels = [
                 int(elem[1]) - 1
                 for elem in mac_channels
-                if elem[0] == device.macAddress
+                if elem[0] == device.address
             ]
         else:
             channels = [
-                int(elem[1]) for elem in mac_channels if elem[0] == device.macAddress
+                int(elem[1]) for elem in mac_channels if elem[0] == device.address
             ]
 
         try:
-            device.start(SamplingRate=fs, analogChannels=channels)
+            if header["service"] == "bitalino":
+                device.start(SamplingRate=fs, analogChannels=channels)
+            
+            elif header["service"] == "scientisst":
+                device.start(sample_rate=fs, channels=channels)
+
 
         except Exception as e:
             config_debug.log(e)
@@ -78,7 +85,7 @@ def start_devices(client, devices, fs, mac_channels, header):
 
 
 def connect_devices(
-    client, devices, opt, already_timed_out, a_file=None, files_open=True
+    client, devices, opt, already_timed_out,
 ):
 
     # This script attempts to connect to the default biosignal acquisition devices in a continuous loop.
@@ -98,9 +105,11 @@ def connect_devices(
 
             try:
                 connected = False
-                connected, devices = connect_device(mac, client, devices)
+                connected, devices = connect_device(
+                    mac, client, devices, opt["service"]
+                )
 
-                if not (connected and mac in [d.macAddress for d in devices]):
+                if not (connected and mac in [d.address for d in devices]):
                     if time.time() - init_connect_time > 3 * i:
                         timeout_json = json.dumps(
                             ["TRYING TO CONNECT", "{}".format(mac)]
@@ -108,6 +117,9 @@ def connect_devices(
                         message_info = client.publish("rpi", timeout_json)
                         if message_info.rc == 4:
                             raise MQTTConnectionError
+                        
+                else:
+                    break
 
             except serial.SerialException as e:
                 time.sleep(2)
@@ -121,9 +133,21 @@ def connect_devices(
 
                 continue
 
-            except bluetooth.btcommon.BluetoothError as e:
+            except ScientISSTNotFound as e:
                 time.sleep(2)
-                config_debug.log(f"Bluetooth connection refused: {e}")
+                config_debug.log(f"Connection refused: {e}")
+                if not already_timed_out and (time.time() - init_connect_time > 3 * i):
+                    timeout_json = json.dumps(["TIMEOUT", "{}".format(mac)])
+                    message_info = client.publish("rpi", timeout_json)
+                    if message_info.rc == 4:
+                        raise MQTTConnectionError
+                    already_timed_out = True
+
+                continue
+
+            except Exception as e:
+                time.sleep(2)
+                config_debug.log(f"Connection refused: {e}")
                 if not already_timed_out and (time.time() - init_connect_time > 3 * i):
                     timeout_json = json.dumps(["TIMEOUT", "{}".format(mac)])
                     message_info = client.publish("rpi", timeout_json)

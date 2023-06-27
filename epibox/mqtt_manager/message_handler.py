@@ -4,7 +4,6 @@ import os
 import subprocess
 import json
 import shutil
-import pwd
 from sys import platform
 
 # local
@@ -12,29 +11,34 @@ from epibox import config_debug
 from epibox.common.get_defaults import get_default
 from epibox.exceptions.system_exceptions import (
     MQTTConnectionError,
-    PlatformNotSupportedError,
+
 )
 
 
-def send_default(client, username):
+def send_default(client):
 
     ######## Available drives ########
+    listDrives = ["DRIVES"]
 
     if platform == "linux" or platform == "linux2":
         # linux
-        drive_path = f"/media/{username}"
+        drive_path = f"/media/{os.environ.get('USERNAME')}"
+        drives = os.listdir(f"/{drive_path}/")
     elif platform == "darwin":
         # macos
         drive_path = "/Volumes"
+        drives = os.listdir(f"/{drive_path}/")
     else:
-        raise PlatformNotSupportedError
-
-    listDrives = ["DRIVES"]
-    drives = os.listdir(f"/{drive_path}/")
-
+        import win32api
+        import win32con
+        import win32file
+        drives = [i for i in win32api.GetLogicalDriveStrings().split('\x00') if i]
+        drives = [d for d in drives if win32file.GetDriveType(d) == win32con.DRIVE_REMOVABLE]
+    
     for drive in drives:
         total, _, free = shutil.disk_usage(f"/{drive_path}/{drive}")
-        listDrives += ["{} ({:.1f}% livre)".format(drive, (free / total) * 100)]
+        listDrives += ["{} ({:.1f}% livre)".format(drive,
+                                                   (free / total) * 100)]
 
     message_info = client.publish(
         topic="rpi", qos=2, payload="{}".format(listDrives)
@@ -44,14 +48,13 @@ def send_default(client, username):
 
     ######## Default MAC addresses ########
 
-    defaults = get_default(username)
+    defaults = get_default()
     listMAC = defaults["devices_mac"]
-    listMAC2 = json.dumps(
-        [
-            "DEFAULT MAC",
-            "{}".format(list(listMAC.values())[0]),
-            "{}".format(list(listMAC.values())[1]),
-        ]
+    listMAC2 = json.dumps(["DEFAULT MAC"] +
+                          [
+
+        "{}".format(address) for address in list(listMAC.values())
+    ]
     )
 
     message_info = client.publish(
@@ -71,7 +74,7 @@ def send_default(client, username):
 
 def on_message(client, userdata, message):
 
-    username = pwd.getpwuid(os.getuid())[0]
+    username = os.environ.get("USERNAME")
     message = str(message.payload.decode("utf-8"))
     message = ast.literal_eval(message)
 
@@ -92,7 +95,8 @@ def on_message(client, userdata, message):
         client.pauseAcq = False
 
     elif message[0] == "ANNOTATION":
-        config_debug.log("RECEIVED ANNOT {} ----------------------".format(message[1]))
+        config_debug.log(
+            "RECEIVED ANNOT {} ----------------------".format(message[1]))
         client.newAnnot = message[1]
 
     elif message[0] == "TURN OFF":
@@ -105,12 +109,14 @@ def on_message(client, userdata, message):
         subprocess.run(["sudo", "shutdown", "-h", "now"])
 
     elif message == ["Send default"]:
-        send_default(client, username)
+        send_default(client)
 
     ######## New default configuration ########
 
     elif message[0] == "NEW CONFIG DEFAULT":
-        defaults = get_default(username)
+        defaults = get_default()
+
+        username = os.environ.get("USERNAME")
 
         for key in message[1].keys():
             defaults[key] = message[1][key]
