@@ -16,7 +16,7 @@ test_requirements = []
 setup(
     author="Ana Sofia Carmo",
     author_email="anascacais@gmail.com",
-    python_requires=">=3.6",
+    python_requires=">=3.6, <3.10",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
@@ -55,6 +55,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/anascacais/epibox",
-    version="1.2.8",
+    version="2.0.0",
     zip_safe=False,
 )
