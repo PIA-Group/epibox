@@ -32,7 +32,10 @@ def kill_client(client):
 def close_devices(devices):
 
     for device in devices:
-        device.close()
+        try:
+            device.close()
+        except:
+            device.disconnect()
 
     config_debug.log("  -- all devices closed --")
 
