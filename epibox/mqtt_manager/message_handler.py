@@ -18,19 +18,23 @@ from epibox.exceptions.system_exceptions import (
 def send_default(client):
 
     ######## Available drives ########
+    listDrives = ["DRIVES"]
+
     if platform == "linux" or platform == "linux2":
         # linux
         drive_path = f"/media/{os.environ.get('USERNAME')}"
+        drives = os.listdir(f"/{drive_path}/")
     elif platform == "darwin":
         # macos
         drive_path = "/Volumes"
+        drives = os.listdir(f"/{drive_path}/")
     else:
-        # import win32api
-        drive_path = ""
-
-    listDrives = ["DRIVES"]
-    drives = os.listdir(f"/{drive_path}/")
-
+        import win32api
+        import win32con
+        import win32file
+        drives = [i for i in win32api.GetLogicalDriveStrings().split('\x00') if i]
+        drives = [d for d in drives if win32file.GetDriveType(d) == win32con.DRIVE_REMOVABLE]
+    
     for drive in drives:
         total, _, free = shutil.disk_usage(f"/{drive_path}/{drive}")
         listDrives += ["{} ({:.1f}% livre)".format(drive,

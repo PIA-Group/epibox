@@ -109,7 +109,7 @@ def connect_devices(
                     mac, client, devices, opt["service"]
                 )
 
-                if not (connected and mac in [d.macAddress for d in devices]):
+                if not (connected and mac in [d.address for d in devices]):
                     if time.time() - init_connect_time > 3 * i:
                         timeout_json = json.dumps(
                             ["TRYING TO CONNECT", "{}".format(mac)]
@@ -117,6 +117,9 @@ def connect_devices(
                         message_info = client.publish("rpi", timeout_json)
                         if message_info.rc == 4:
                             raise MQTTConnectionError
+                        
+                else:
+                    break
 
             except serial.SerialException as e:
                 time.sleep(2)
