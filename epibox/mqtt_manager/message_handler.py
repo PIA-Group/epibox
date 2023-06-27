@@ -22,19 +22,20 @@ def send_default(client):
 
     if platform == "linux" or platform == "linux2":
         # linux
-        drive_path = f"/media/{os.environ.get('USERNAME')}"
+        drive_path = os.path.join("media", os.getlogin())
         drives = os.listdir(f"/{drive_path}/")
     elif platform == "darwin":
         # macos
         drive_path = "/Volumes"
-        drives = os.listdir(f"/{drive_path}/")
+        drives = os.listdir(f"{drive_path}/")
     else:
         import win32api
         import win32con
         import win32file
         drives = [i for i in win32api.GetLogicalDriveStrings().split('\x00') if i]
-        drives = [d for d in drives if win32file.GetDriveType(d) == win32con.DRIVE_REMOVABLE]
-    
+        drives = [d for d in drives if win32file.GetDriveType(
+            d) == win32con.DRIVE_REMOVABLE]
+
     for drive in drives:
         total, _, free = shutil.disk_usage(f"/{drive_path}/{drive}")
         listDrives += ["{} ({:.1f}% livre)".format(drive,
@@ -74,7 +75,7 @@ def send_default(client):
 
 def on_message(client, userdata, message):
 
-    username = os.environ.get("USERNAME")
+    username = os.getlogin()
     message = str(message.payload.decode("utf-8"))
     message = ast.literal_eval(message)
 
@@ -116,7 +117,7 @@ def on_message(client, userdata, message):
     elif message[0] == "NEW CONFIG DEFAULT":
         defaults = get_default()
 
-        username = os.environ.get("USERNAME")
+        username = os.getlogin()
 
         for key in message[1].keys():
             defaults[key] = message[1][key]

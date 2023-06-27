@@ -122,7 +122,7 @@ def check_storage(client, opt):
 
     if platform == "linux" or platform == "linux2":
         # linux
-        drive_path = f"/media/{os.environ.get('USERNAME')}"
+        drive_path = os.path.join("media", os.getlogin())
     elif platform == "darwin":
         # macos
         drive_path = "/Volumes"
