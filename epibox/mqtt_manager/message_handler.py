@@ -4,7 +4,6 @@ import os
 import subprocess
 import json
 import shutil
-import pwd
 from sys import platform
 
 # local

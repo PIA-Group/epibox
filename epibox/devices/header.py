@@ -21,59 +21,59 @@ def get_header(
     for n_device, device in enumerate(devices):
 
         fmt += ["%i"]
-        header_dict[device.macAddress] = {}
-        header_dict[device.macAddress]["sensor"] = []
+        header_dict[device.address] = {}
+        header_dict[device.address]["sensor"] = []
         for i, elem in enumerate(mac_channels):
-            if elem[0] == device.macAddress:
-                header_dict[device.macAddress]["sensor"] += [sensors[i]]
+            if elem[0] == device.address:
+                header_dict[device.address]["sensor"] += [sensors[i]]
                 if save_raw:
                     fmt += ["%i"]
                 else:
                     fmt += ["%.2f"]
-        header_dict[device.macAddress]["device name"] = "Device " + \
+        header_dict[device.address]["device name"] = "Device " + \
             str(n_device + 1)
 
         aux = [elem[1]
-               for elem in mac_channels if elem[0] == device.macAddress]
-        header_dict[device.macAddress]["column"] = ["nSeq"] + aux
-        columns += header_dict[device.macAddress]["column"]
+               for elem in mac_channels if elem[0] == device.address]
+        header_dict[device.address]["column"] = ["nSeq"] + aux
+        columns += header_dict[device.address]["column"]
 
-        header_dict[device.macAddress]["start time"] = file_time
-        header_dict[device.macAddress]["device connection"] = device.macAddress
+        header_dict[device.address]["start time"] = file_time
+        header_dict[device.address]["device connection"] = device.address
 
-        header_dict[device.macAddress]["channels"] = [
-            int(elem[1]) for elem in mac_channels if elem[0] == device.macAddress
+        header_dict[device.address]["channels"] = [
+            int(elem[1]) for elem in mac_channels if elem[0] == device.address
         ]
 
-        header_dict[device.macAddress]["date"] = file_date
-        # header_dict[device.macAddress]["firmware version"] = device.version()
+        header_dict[device.address]["date"] = file_date
+        # header_dict[device.address]["firmware version"] = device.version()
 
         if service == "bitalino":
-            header_dict[device.macAddress]["device"] = "bitalino_rev"
+            header_dict[device.address]["device"] = "bitalino_rev"
             aux = [10, 10, 10, 10, 6, 6]  # resolution
         elif service == "scientisst":
-            header_dict[device.macAddress]["device"] = "scientisst_sense"
+            header_dict[device.address]["device"] = "scientisst_sense"
             aux = [12, 12, 12, 12, 12, 12]
         else:
             raise ValueError("Device not recognized")
 
-        aux2 = [1 for elem in mac_channels if elem[0] == device.macAddress]
-        header_dict[device.macAddress]["resolution"] = [4] + [
+        aux2 = [1 for elem in mac_channels if elem[0] == device.address]
+        header_dict[device.address]["resolution"] = [4] + [
             aux[i] for i in range(len(aux2))
         ]
-        resolution[device.macAddress] = header_dict[device.macAddress]["resolution"]
+        resolution[device.address] = header_dict[device.address]["resolution"]
 
-        header_dict[device.macAddress]["sampling rate"] = fs
+        header_dict[device.address]["sampling rate"] = fs
 
         if save_raw:
-            header_dict[device.macAddress]["label"] = [
-                "RAW" for elem in mac_channels if elem[0] == device.macAddress
+            header_dict[device.address]["label"] = [
+                "RAW" for elem in mac_channels if elem[0] == device.address
             ]
         else:
-            header_dict[device.macAddress]["label"] = [
+            header_dict[device.address]["label"] = [
                 sensors[i]
                 for i, elem in enumerate(mac_channels)
-                if elem[0] == device.macAddress
+                if elem[0] == device.address
             ]
 
     header = {"resolution": resolution,
@@ -83,6 +83,6 @@ def get_header(
     config_debug.log(f"# {columns} \n")
 
     filename.write("# " + str(header_dict) + "\n")
-    filename.write("# " + str(columns) + "\n")
+    filename.write("\t".join(columns) + "\n")
 
     return tuple(fmt), header

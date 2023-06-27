@@ -33,6 +33,7 @@ def connect_device(address, client, devices, service):
 
         if service == "bitalino":
             device = bitalino.BITalino(address, timeout=5)
+            setattr(device, "address", address) # Bitalino uses "address" attribute and ScientISST uses "address"
             devices += [device]
 
         elif service == "scientisst":

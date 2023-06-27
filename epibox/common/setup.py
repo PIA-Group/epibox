@@ -1,6 +1,5 @@
 # built-in
 import time
-import pwd
 import os
 from sys import platform
 
@@ -54,7 +53,6 @@ def setup_client():
 def setup_config(client):
     # Access default configurations on EpiBOX Core and save them to variables ======================
 
-    username = pwd.getpwuid(os.getuid())[0]
 
     # inform the EpiBOX App which are the current default devices
     send_default(client, username)
@@ -123,16 +121,16 @@ def check_storage(client, opt):
     # Check if default storage is available | loop runs continuosly until it find the storage or until timeout
     # If timeout, setup loop and acquisition are terminated
 
-    username = pwd.getpwuid(os.getuid())[0]
 
     if platform == "linux" or platform == "linux2":
         # linux
-        drive_path = f"/media/{username}"
+        drive_path = f"/media/{os.environ.get('USERNAME')}"
     elif platform == "darwin":
         # macos
         drive_path = "/Volumes"
     else:
-        raise PlatformNotSupportedError
+        # import win32api
+        drive_path = ""
 
     init_connect_time = time.time()
     config_debug.log(f'Searching for storage module: {opt["initial_dir"]}')

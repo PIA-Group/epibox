@@ -49,19 +49,24 @@ def start_devices(client, devices, fs, mac_channels, header):
     # Initialize devices
     for device in devices:
 
-        if header["service"] == "Bitalino":
+        if header["service"] == "bitalino":
             channels = [
                 int(elem[1]) - 1
                 for elem in mac_channels
-                if elem[0] == device.macAddress
+                if elem[0] == device.address
             ]
         else:
             channels = [
-                int(elem[1]) for elem in mac_channels if elem[0] == device.macAddress
+                int(elem[1]) for elem in mac_channels if elem[0] == device.address
             ]
 
         try:
-            device.start(SamplingRate=fs, analogChannels=channels)
+            if header["service"] == "bitalino":
+                device.start(SamplingRate=fs, analogChannels=channels)
+            
+            elif header["service"] == "scientisst":
+                device.start(sample_rate=fs, channels=channels)
+
 
         except Exception as e:
             config_debug.log(e)
