@@ -53,9 +53,8 @@ def setup_client():
 def setup_config(client):
     # Access default configurations on EpiBOX Core and save them to variables ======================
 
-
     # inform the EpiBOX App which are the current default devices
-    send_default(client, username)
+    send_default(client)
     opt = get_default()
 
     if not opt["channels"]:
@@ -120,7 +119,6 @@ def setup_variables():
 def check_storage(client, opt):
     # Check if default storage is available | loop runs continuosly until it find the storage or until timeout
     # If timeout, setup loop and acquisition are terminated
-
 
     if platform == "linux" or platform == "linux2":
         # linux

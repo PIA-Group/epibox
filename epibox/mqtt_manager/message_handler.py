@@ -11,22 +11,22 @@ from epibox import config_debug
 from epibox.common.get_defaults import get_default
 from epibox.exceptions.system_exceptions import (
     MQTTConnectionError,
-    PlatformNotSupportedError,
+
 )
 
 
-def send_default(client, username):
+def send_default(client):
 
     ######## Available drives ########
-
     if platform == "linux" or platform == "linux2":
         # linux
-        drive_path = f"/media/{username}"
+        drive_path = f"/media/{os.environ.get('USERNAME')}"
     elif platform == "darwin":
         # macos
         drive_path = "/Volumes"
     else:
-        raise PlatformNotSupportedError
+        # import win32api
+        drive_path = ""
 
     listDrives = ["DRIVES"]
     drives = os.listdir(f"/{drive_path}/")
@@ -44,7 +44,7 @@ def send_default(client, username):
 
     ######## Default MAC addresses ########
 
-    defaults = get_default(username)
+    defaults = get_default()
     listMAC = defaults["devices_mac"]
     listMAC2 = json.dumps(["DEFAULT MAC"] +
                           [
@@ -70,7 +70,7 @@ def send_default(client, username):
 
 def on_message(client, userdata, message):
 
-    username = pwd.getpwuid(os.getuid())[0]
+    username = os.environ.get("USERNAME")
     message = str(message.payload.decode("utf-8"))
     message = ast.literal_eval(message)
 
@@ -105,12 +105,14 @@ def on_message(client, userdata, message):
         subprocess.run(["sudo", "shutdown", "-h", "now"])
 
     elif message == ["Send default"]:
-        send_default(client, username)
+        send_default(client)
 
     ######## New default configuration ########
 
     elif message[0] == "NEW CONFIG DEFAULT":
-        defaults = get_default(username)
+        defaults = get_default()
+
+        username = os.environ.get("USERNAME")
 
         for key in message[1].keys():
             defaults[key] = message[1][key]
