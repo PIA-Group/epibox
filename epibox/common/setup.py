@@ -2,6 +2,7 @@
 import time
 import os
 from sys import platform
+from pathlib import Path
 
 # third-party
 import paho.mqtt.client as mqtt
@@ -120,34 +121,36 @@ def check_storage(client, opt):
     # Check if default storage is available | loop runs continuosly until it find the storage or until timeout
     # If timeout, setup loop and acquisition are terminated
 
-    if platform == "linux" or platform == "linux2":
-        # linux
-        drive_path = os.path.join("media", os.getlogin())
-    elif platform == "darwin":
-        # macos
-        drive_path = "/Volumes"
+    if opt["initial_dir"] == "EpiBOX Core":
+        drive_path = os.path.join(Path.home(), "Documents", "EpiBOX Core")
+        opt["initial_dir"] = os.path.join(drive_path, "acquisitions")
+
     else:
-        # import win32api
-        drive_path = ""
-
-    init_connect_time = time.time()
-    config_debug.log(f'Searching for storage module: {opt["initial_dir"]}')
-
-    for i in range(100000):
-
-        if (time.time() - init_connect_time) > 120:
-            raise StorageTimeout
-
-        if os.path.isdir(f"/{drive_path}/" + opt["initial_dir"]):
-            opt["initial_dir"] = (
-                f"/{drive_path}/" + opt["initial_dir"] + "/acquisitions"
-            )
-            break
-
+        if platform == "linux" or platform == "linux2":
+            # linux
+            drive_path = os.path.join("/media", os.getlogin(), opt["initial_dir"])
+        elif platform == "darwin":
+            # macos
+            drive_path = os.path.join("/Volumes", opt["initial_dir"])
         else:
-            if time.time() - init_connect_time > 3 * i:
-                message_info = client.publish("rpi", str(["INSERT STORAGE"]))
-                if message_info.rc == 4:
-                    raise MQTTConnectionError
+            drive_path = opt["initial_dir"]
+
+        init_connect_time = time.time()
+        config_debug.log(f'Searching for storage module: {opt["initial_dir"]}')
+
+        for i in range(100000):
+
+            if (time.time() - init_connect_time) > 120:
+                raise StorageTimeout
+
+            if os.path.isdir(drive_path):
+                opt["initial_dir"] = os.path.join(drive_path, "acquisitions")
+                break
+
+            else:
+                if time.time() - init_connect_time > 3 * i:
+                    message_info = client.publish("rpi", str(["INSERT STORAGE"]))
+                    if message_info.rc == 4:
+                        raise MQTTConnectionError
 
     return opt

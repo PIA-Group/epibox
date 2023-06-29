@@ -56,6 +56,10 @@ def main():
     except (MQTTConnectionError, ConnectionRefusedError, ValueError, TypeError) as e:
         config_debug.log(e)
         kill_case_1()
+    except (TimeoutError, ConnectionAbortedError):
+        config_debug.log("Wrong network - connect to PreEpiSeizures")
+        kill_case_1()
+
 
     try:
         opt, channels, sensors, service, save_raw = setup_config(client)
@@ -110,13 +114,6 @@ def main():
 
         try:
 
-            if client.newAnnot != None:
-                # Write user annotation to file if one is received via MQTT ===============================
-                # TODO exception handling
-                config_debug.log(f"annot: {client.newAnnot}")
-                write_annot_file(a_file.name, client.newAnnot)
-                client.newAnnot = None
-
             if client.pauseAcq and not already_notified_pause:
                 # Pause acquisition if command is received via MQTT ========================================
 
@@ -128,7 +125,7 @@ def main():
                 already_notified_pause = True
 
             if not client.pauseAcq:
-
+                
                 if already_notified_pause:
                     message_info = client.publish("rpi", str(["RECONNECTING"]))
                     if message_info.rc == 4:
@@ -146,6 +143,14 @@ def main():
                         save_raw,
                         service,
                     )
+
+                    if client.newAnnot != None:
+                        # Write user annotation to file if one is received via MQTT ===============================
+                        # TODO exception handling
+                        config_debug.log(f"annot: {client.newAnnot}")
+                        write_annot_file(a_file.name, client.newAnnot)
+                        client.newAnnot = None
+
                     sync_param = start_devices(
                         client, devices, opt["fs"], channels, header
                     )

@@ -100,6 +100,8 @@ def connect_devices(
 
         for i in range(100000):
 
+            if not client.keepAlive: break
+
             if (time.time() - init_connect_time) > 120:
                 raise DeviceConnectionTimeout
 

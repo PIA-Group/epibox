@@ -5,6 +5,7 @@ import subprocess
 import json
 import shutil
 from sys import platform
+from pathlib import Path
 
 # local
 from epibox import config_debug
@@ -22,12 +23,12 @@ def send_default(client):
 
     if platform == "linux" or platform == "linux2":
         # linux
-        drive_path = os.path.join("media", os.getlogin())
-        drives = os.listdir(f"/{drive_path}/")
+        drive_path = os.path.join("/media", os.getlogin())
+        drives = [os.path.join(drive_path, d) for d in os.listdir(drive_path)]
     elif platform == "darwin":
         # macos
         drive_path = "/Volumes"
-        drives = os.listdir(f"{drive_path}/")
+        drives = [os.path.join(drive_path, d) for d in os.listdir(drive_path)]
     else:
         import win32api
         import win32con
@@ -37,7 +38,7 @@ def send_default(client):
             d) == win32con.DRIVE_REMOVABLE]
 
     for drive in drives:
-        total, _, free = shutil.disk_usage(f"/{drive_path}/{drive}")
+        total, _, free = shutil.disk_usage(drive)
         listDrives += ["{} ({:.1f}% livre)".format(drive,
                                                    (free / total) * 100)]
 
@@ -123,7 +124,7 @@ def on_message(client, userdata, message):
             defaults[key] = message[1][key]
 
         with open(
-            "/home/{}/Documents/epibox/args.json".format(username), "w+"
+            os.path.join(Path.home(), "Documents", "EpiBOX Core", "args.json"), "w+"
         ) as json_file:
             json.dump(defaults, json_file)
 
