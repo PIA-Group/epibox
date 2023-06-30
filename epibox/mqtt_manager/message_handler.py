@@ -23,7 +23,8 @@ def send_default(client):
 
     if platform == "linux" or platform == "linux2":
         # linux
-        drive_path = os.path.join("/media", os.getlogin())
+        import pwd
+        drive_path = os.path.join("/media", pwd.getpwuid(os.getuid())[0])
         drives = [os.path.join(drive_path, d) for d in os.listdir(drive_path)]
     elif platform == "darwin":
         # macos
@@ -76,7 +77,6 @@ def send_default(client):
 
 def on_message(client, userdata, message):
 
-    username = os.getlogin()
     message = str(message.payload.decode("utf-8"))
     message = ast.literal_eval(message)
 
@@ -118,13 +118,12 @@ def on_message(client, userdata, message):
     elif message[0] == "NEW CONFIG DEFAULT":
         defaults = get_default()
 
-        username = os.getlogin()
-
         for key in message[1].keys():
             defaults[key] = message[1][key]
 
         with open(
-            os.path.join(Path.home(), "Documents", "EpiBOX Core", "args.json"), "w+"
+            os.path.join(Path.home(), "Documents",
+                         "EpiBOX Core", "args.json"), "w+"
         ) as json_file:
             json.dump(defaults, json_file)
 

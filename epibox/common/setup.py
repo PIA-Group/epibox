@@ -128,7 +128,9 @@ def check_storage(client, opt):
     else:
         if platform == "linux" or platform == "linux2":
             # linux
-            drive_path = os.path.join("/media", os.getlogin(), opt["initial_dir"])
+            import pwd
+            drive_path = os.path.join(
+                "/media", pwd.getpwuid(os.getuid())[0], opt["initial_dir"])
         elif platform == "darwin":
             # macos
             drive_path = os.path.join("/Volumes", opt["initial_dir"])
@@ -149,7 +151,8 @@ def check_storage(client, opt):
 
             else:
                 if time.time() - init_connect_time > 3 * i:
-                    message_info = client.publish("rpi", str(["INSERT STORAGE"]))
+                    message_info = client.publish(
+                        "rpi", str(["INSERT STORAGE"]))
                     if message_info.rc == 4:
                         raise MQTTConnectionError
 
