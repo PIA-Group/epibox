@@ -17,7 +17,6 @@ def connect_device(address, client, devices, service):
 
     connected = False
     devices = [d for d in devices if d]  # remove None
-    config_debug.log(f" devices: {devices}")
 
     if address in [d.address for d in devices]:
         try:

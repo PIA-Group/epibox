@@ -14,7 +14,7 @@ def get_default():
             "initial_dir": "EpiBOX Core",
             "fs": 1000,
             "channels": [],
-            "devices_mac": {"MAC1": "COM3"},
+            "devices_mac": {"MAC1": "34:94:54:5E:32:2E"},
             "save_raw": "true",
             "patient_id": "default",
             "service": "scientisst",
