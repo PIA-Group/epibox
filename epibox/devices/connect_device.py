@@ -36,13 +36,15 @@ def connect_device(address, client, devices, service):
             devices += [device]
 
         elif service == "scientisst":
-            ports = comports()
-            address = [port.device for port in ports if address in port.device]
 
-            if address == []:
-                raise ScientISSTNotFound
-            else:
-                address = address[0]
+            # TODO: implement for windows - find COM port through MAC
+            # ports = comports()
+            # address = [port.device for port in ports if address in port.device]
+
+            # if address == []:
+            #     raise ScientISSTNotFound
+            # else:
+            #     address = address[0]
 
             device = scientisst.ScientISST(address)
             devices += [device]
