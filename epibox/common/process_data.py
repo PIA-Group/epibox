@@ -1,5 +1,6 @@
 # third-party
 from scipy import signal
+from scipy.stats import kurtosis
 import itertools
 import numpy as np
 
@@ -53,3 +54,18 @@ def decimate(t, fs):
         t_display += [t_aux.tolist()]
 
     return t_display
+
+
+def quality_check(t, fs, sensors):
+
+    """ Check quality
+    """
+
+    if len(t) < 5*fs:
+        return np.zeros(t.shape[1])
+    else:
+        if 'ECG' not in sensors:
+            # ECG is by default in position 1
+            return np.ones(t.shape[1]) * (kurtosis(t[:,1]) > 5)
+        else:
+            return np.ones(t.shape[1])
