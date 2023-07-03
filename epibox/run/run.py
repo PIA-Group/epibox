@@ -180,9 +180,9 @@ def main():
                     t_buffer = t_disp
                 else:
                     t_buffer = vstack((t_buffer, t_disp))
-                # needs at least 5 sec to assess quality
-                if len(t_buffer) >= 5*opt["fs"]: 
-                    t_buffer = t_buffer[-5*opt["fs"]:]
+                # needs at least 3 sec to assess quality
+                if len(t_buffer) >= 3*opt["fs"]: 
+                    t_buffer = t_buffer[-3*opt["fs"]:]
                     quality = process_data.quality_check(t_buffer, sensors)
                 else:
                     quality = [0] * t_disp.shape[1]
