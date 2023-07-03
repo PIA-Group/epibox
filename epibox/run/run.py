@@ -158,7 +158,7 @@ def main():
                     already_timed_out = False
 
                 # Read batch of samples from the acquisition devices and store on the active session's file
-                _, t_disp, a_file, sync_param = run_system(
+                t_rec, t_disp, a_file, sync_param = run_system(
                     devices,
                     a_file,
                     sync_param,
@@ -172,7 +172,8 @@ def main():
                 # Subsample batch of samples and send to the EpiBOX App for visualization purposes ================
                 t_display = process_data.decimate(t_disp, opt["fs"])
                 t_all += t_display[0]
-                json_data = json.dumps(["DATA", t_display, channels, sensors])
+                quality = process_data.quality_check(t_rec, channels, sensors)
+                json_data = json.dumps(["DATA", t_display, channels, sensors, quality])
                 message_info = client.publish("rpi", json_data)
                 if message_info.rc == 4:
                     raise MQTTConnectionError
