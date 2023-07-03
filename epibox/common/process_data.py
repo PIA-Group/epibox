@@ -68,8 +68,18 @@ def quality_check(t_buffer, sensors):
     Return:
     - list of quality points
     """
+    quality = np.ones(t_buffer.shape[1])
     if 'ECG' not in sensors:
         # ECG is by default in position 1
-        return list(np.ones(t_buffer.shape[1]) * (kurtosis(t_buffer[:,1]) > 5))
+        return list(np.ones(t_buffer.shape[1]) * (kurtosis(t_buffer[:,0]) > 5))
     else:
-        return list(np.ones(t_buffer.shape[1]))
+        for ss, sensor in enumerate(sensors):
+            if sensor == 'ECG':
+                quality[ss] = int(2 * (kurtosis(t_buffer[:, -t_buffer.shape[1]+ss]) > 5)) # returns 0 or 2
+            if sensor == 'RESP':
+                quality[ss] = int(2 * (max(t_buffer[:,-t_buffer.shape[1]+ss]) - min(t_buffer[:,-t_buffer.shape[1]+ss]) > 0))
+            if sensor == 'ACC':
+                quality[ss] = int(2 * (max(t_buffer[:,-t_buffer.shape[1]+ss]) - min(t_buffer[:,-t_buffer.shape[1]+ss]) > 0))
+        return quality
+    
+    
