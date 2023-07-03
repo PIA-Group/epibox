@@ -1,6 +1,9 @@
 # built-in
 import json
 
+# third-party
+from numpy import vstack
+
 # local
 from epibox.devices.manage_devices import connect_devices, start_devices
 from epibox.exceptions.exception_manager import (
@@ -173,11 +176,14 @@ def main():
                 # Subsample batch of samples and send to the EpiBOX App for visualization purposes ================
                 t_display = process_data.decimate(t_disp, opt["fs"])
                 t_all += t_display[0]
-                t_buffer += [t_disp]
+                if len(t_buffer) == 0:
+                    t_buffer = t_disp
+                else:
+                    t_buffer = vstack((t_buffer, t_disp))
                 # needs at least 5 sec to assess quality
                 if len(t_buffer) >= 5*opt["fs"]: 
                     t_buffer = t_buffer[-5*opt["fs"]:]
-                    quality = process_data.quality_check(t_buffer, opt["fs"], sensors)
+                    quality = process_data.quality_check(t_buffer, sensors)
                 else:
                     quality = [0] * t_disp.shape[1]
                 

@@ -3,7 +3,6 @@ from scipy import signal
 from scipy.stats import kurtosis
 import itertools
 import numpy as np
-import pandas as pd
 
 # local
 from epibox import config_debug
