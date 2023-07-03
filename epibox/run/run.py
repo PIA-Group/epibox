@@ -66,6 +66,7 @@ def main():
 
         (
             t_all,
+            t_buffer,
             already_notified_pause,
             system_started,
         ) = setup_variables()  # raises no errors
@@ -171,8 +172,15 @@ def main():
 
                 # Subsample batch of samples and send to the EpiBOX App for visualization purposes ================
                 t_display = process_data.decimate(t_disp, opt["fs"])
-                t_all += t_disp.shape[0]
-                quality = process_data.quality_check(a_file, t_all, opt["fs"], sensors)
+                t_all += t_display[0]
+                t_buffer += [t_disp]
+                # needs at least 5 sec to assess quality
+                if len(t_buffer) >= 5*opt["fs"]: 
+                    t_buffer = t_buffer[-5*opt["fs"]:]
+                    quality = process_data.quality_check(t_buffer, opt["fs"], sensors)
+                else:
+                    quality = [0] * t_disp.shape[1]
+                
                 json_data = json.dumps(["DATA", t_display, channels, sensors, quality])
                 message_info = client.publish("rpi", json_data)
                 if message_info.rc == 4:

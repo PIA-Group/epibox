@@ -57,28 +57,20 @@ def decimate(t, fs):
     return t_display
 
 
-def quality_check(a_file, t_all, fs, sensors):
+def quality_check(t_buffer, sensors):
 
     """ 
     Check quality from the last 5 seconds of the acquisition file
 
     Parameters:
-    - a_file: acquisition file
-    - t_all: current length of acquisition file
-    - fs: sampling frequency
+    - t_buffer: buffer with 5 seconds to evaluate quality
     - sensors: list of sensors
 
     Return:
     - list of quality points
     """
-    t = pd.read_csv(a_file.name, skiprows=t_all - 5*fs)
-    if len(t) < 5*fs:
-        # give high quality when the quality cannot be assessed yet
-        return list(np.ones(t.shape[1]))
+    if 'ECG' not in sensors:
+        # ECG is by default in position 1
+        return list(np.ones(t_buffer.shape[1]) * (kurtosis(t_buffer[:,1]) > 5))
     else:
-        t = t[-5*fs:]
-        if 'ECG' not in sensors:
-            # ECG is by default in position 1
-            return list(np.ones(t.shape[1]) * (kurtosis(t[:,1]) > 5))
-        else:
-            return list(np.ones(t.shape[1]))
+        return list(np.ones(t_buffer.shape[1]))

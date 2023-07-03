@@ -112,9 +112,10 @@ def setup_variables():
 
     already_notified_pause = False
     system_started = False
+    t_buffer = []
     t_all = []
-
-    return t_all, already_notified_pause, system_started
+    
+    return t_all, t_buffer, already_notified_pause, system_started
 
 
 def check_storage(client, opt):
