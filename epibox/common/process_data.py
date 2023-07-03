@@ -65,6 +65,7 @@ def quality_check(t, fs, sensors):
         # give high quality when the quality cannot be assessed yet
         return list(np.ones(t.shape[1]))
     else:
+        t = t[-5*fs:]
         if 'ECG' not in sensors:
             # ECG is by default in position 1
             return list(np.ones(t.shape[1]) * (kurtosis(t[:,1]) > 5))

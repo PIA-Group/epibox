@@ -171,8 +171,8 @@ def main():
 
                 # Subsample batch of samples and send to the EpiBOX App for visualization purposes ================
                 t_display = process_data.decimate(t_disp, opt["fs"])
-                t_all += t_display[0]
-                quality = process_data.quality_check(t_rec, opt['fs'], sensors)
+                t_all += t_disp
+                quality = process_data.quality_check(t_all, opt["fs"], sensors)
                 json_data = json.dumps(["DATA", t_display, channels, sensors, quality])
                 message_info = client.publish("rpi", json_data)
                 if message_info.rc == 4:
