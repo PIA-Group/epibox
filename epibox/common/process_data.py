@@ -3,6 +3,7 @@ from scipy import signal
 from scipy.stats import kurtosis
 import itertools
 import numpy as np
+import pandas as pd
 
 # local
 from epibox import config_debug
@@ -56,11 +57,21 @@ def decimate(t, fs):
     return t_display
 
 
-def quality_check(t, fs, sensors):
+def quality_check(a_file, t_all, fs, sensors):
 
-    """ Check quality
+    """ 
+    Check quality from the last 5 seconds of the acquisition file
+
+    Parameters:
+    - a_file: acquisition file
+    - t_all: current length of acquisition file
+    - fs: sampling frequency
+    - sensors: list of sensors
+
+    Return:
+    - list of quality points
     """
-
+    t = pd.read_csv(a_file.name, skiprows=t_all - 5*fs)
     if len(t) < 5*fs:
         # give high quality when the quality cannot be assessed yet
         return list(np.ones(t.shape[1]))
