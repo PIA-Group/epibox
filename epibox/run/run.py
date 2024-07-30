@@ -60,7 +60,6 @@ def main():
         config_debug.log("Wrong network - connect to PreEpiSeizures")
         kill_case_1()
 
-
     try:
         opt, channels, sensors, service, save_raw = setup_config(client)
 
@@ -125,7 +124,7 @@ def main():
                 already_notified_pause = True
 
             if not client.pauseAcq:
-                
+
                 if already_notified_pause:
                     message_info = client.publish("rpi", str(["RECONNECTING"]))
                     if message_info.rc == 4:
@@ -147,7 +146,7 @@ def main():
                     if client.newAnnot != None:
                         # Write user annotation to file if one is received via MQTT ===============================
                         # TODO exception handling
-                        config_debug.log(f"annot: {client.newAnnot}")
+                        config_debug.log(f'annot: {client.newAnnot}')
                         write_annot_file(a_file.name, client.newAnnot)
                         client.newAnnot = None
 

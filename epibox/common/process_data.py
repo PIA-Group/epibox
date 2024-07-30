@@ -28,13 +28,13 @@ def get_factors(n):
 
     while np.prod(final_factors) != n2:
 
-        config_debug.log(f"combos: {combos}")
+        # config_debug.log(f"combos: {combos}")
         combination = [
             [i, p] for i, p in enumerate([x * y for x, y in combos]) if p <= 13
         ]
 
         final_factors += [combination[0][1]]
-        config_debug.log(f"final_factors: {final_factors}")
+        # config_debug.log(f"final_factors: {final_factors}")
 
         combos.remove(combos[combination[0][0]])
 
