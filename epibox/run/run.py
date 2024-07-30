@@ -146,7 +146,7 @@ def main():
                     if client.newAnnot != None:
                         # Write user annotation to file if one is received via MQTT ===============================
                         # TODO exception handling
-                        config_debug.log(f'annot: {client.newAnnot}')
+                        # config_debug.log(f'annot: {client.newAnnot}')
                         write_annot_file(a_file.name, client.newAnnot)
                         client.newAnnot = None
 
