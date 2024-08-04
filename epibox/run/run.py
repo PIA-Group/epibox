@@ -2,6 +2,7 @@
 import json
 
 # local
+from epibox.common.get_defaults import set_new_default_item
 from epibox.devices.manage_devices import connect_devices, start_devices
 from epibox.exceptions.exception_manager import (
     handle_case_6,
@@ -28,6 +29,7 @@ from epibox.exceptions.system_exceptions import (
     PlatformNotSupportedError,
     StorageTimeout,
 )
+from epibox.mqtt_manager.message_handler import send_default
 
 
 # ****************************** MAIN SCRIPT ***********************************
@@ -70,13 +72,16 @@ def main():
         ) = setup_variables()  # raises no errors
 
         # Create folder with patient ID
-        directory = create_folder(
-            opt["initial_dir"], "{}".format(opt["patient_id"]))
+        raise PermissionError
+        # directory = create_folder(
+        #     opt["initial_dir"], "{}".format(opt["patient_id"]))
 
     except MQTTConnectionError as e:
         kill_case_1()
     except PermissionError:
-        client.publish("rpi", str(["INSERT STORAGE"]))
+        client.publish("rpi", str(["STORAGE ERROR"]))
+        set_new_default_item(item_key="initial_dir", item="EpiBOX Core")
+        send_default(client)
         kill_case_2(client)
     except (
         ConnectionRefusedError,
