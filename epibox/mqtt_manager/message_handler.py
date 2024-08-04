@@ -6,6 +6,7 @@ import json
 import shutil
 from sys import platform
 from pathlib import Path
+from datetime import datetime
 
 # local
 from epibox import config_debug
@@ -99,7 +100,8 @@ def on_message(client, userdata, message):
     elif message[0] == "ANNOTATION":
         config_debug.log(
             "RECEIVED ANNOT {} ----------------------".format(message[1]))
-        client.newAnnot = message[1]
+        client.newAnnot = message[1] + \
+            [datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')]
 
     elif message[0] == "TURN OFF":
         config_debug.log("TURNING OFF RPI")
@@ -131,3 +133,5 @@ def on_message(client, userdata, message):
         message_info = client.publish(topic="rpi", qos=2, payload=msg)
         if message_info.rc == 4:
             raise MQTTConnectionError
+
+        client.keepAlive = False

@@ -32,5 +32,4 @@ def open_file(directory, devices, mac_channels, sensors, fs, save_raw, service):
         service,
     )
 
-
     return a_file, save_fmt, header

@@ -31,7 +31,6 @@ def read_modules(devices, mac_channels, sensors, header):
         )  # remove digital channels
         t_nseq = t_read[:, 1:]  # remove nSeq column (add again in the end)
 
-
         # else:
         #     seq = []
         #     t_nseq = []
@@ -55,9 +54,9 @@ def read_modules(devices, mac_channels, sensors, header):
         #             )
         #             t_nseq = np.vstack((t_nseq, t_nseq_aux))
 
-        #t_read = np.hstack((np.reshape(np.array(seq), (-1, 1)), t_nseq))
+        # t_read = np.hstack((np.reshape(np.array(seq), (-1, 1)), t_nseq))
 
-        config_debug.log(t_nseq)
+        # config_debug.log(t_nseq)
 
         n = 0
         display_aux = np.array([])

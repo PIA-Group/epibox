@@ -24,11 +24,17 @@ def write_acq_file(a_file, t, fmt):
 
 def write_annot_file(recording_name, annot):
 
-    with open(
-        os.path.join(os.path.split(recording_name)[0], "annotations" + ".txt"), "a+"
-    ) as file:
+    annot_filename = os.path.join(os.path.split(recording_name)[
+        0], "annotations" + ".txt")
+
+    if not os.path.isfile(annot_filename):
+        header = 'filename\tlabel\tvalue\treal time\tEpiBOX time\n'
+    else:
+        header = ''
+
+    with open(annot_filename, "a+") as file:
         file.write(
-            f"{os.path.split(recording_name)[1]}    {annot[0]}    {annot[1]}    {datetime.now()}\n"
+            f"{header}{os.path.split(recording_name)[1]}\t{annot[0]}\t{annot[1]}\t{annot[2]}\t{annot[3]}\n"
         )
 
 
@@ -40,7 +46,8 @@ def write_summary_file(recording_name):
     config_debug.log(f"duration: {str(duration)}")
 
     with open(
-        os.path.join(os.path.split(recording_name)[0], "summary" + ".txt"), "a+"
+        os.path.join(os.path.split(recording_name)
+                     [0], "summary" + ".txt"), "a+"
     ) as file:
         file.write(
             "{}  {}\n".format(

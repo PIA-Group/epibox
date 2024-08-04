@@ -2,6 +2,7 @@
 import json
 
 # local
+from epibox.common.get_defaults import set_new_default_item
 from epibox.devices.manage_devices import connect_devices, start_devices
 from epibox.exceptions.exception_manager import (
     handle_case_6,
@@ -28,6 +29,7 @@ from epibox.exceptions.system_exceptions import (
     PlatformNotSupportedError,
     StorageTimeout,
 )
+from epibox.mqtt_manager.message_handler import send_default
 
 
 # ****************************** MAIN SCRIPT ***********************************
@@ -60,7 +62,6 @@ def main():
         config_debug.log("Wrong network - connect to PreEpiSeizures")
         kill_case_1()
 
-
     try:
         opt, channels, sensors, service, save_raw = setup_config(client)
 
@@ -76,6 +77,11 @@ def main():
 
     except MQTTConnectionError as e:
         kill_case_1()
+    except PermissionError:
+        client.publish("rpi", str(["STORAGE ERROR"]))
+        set_new_default_item(item_key="initial_dir", item="EpiBOX Core")
+        send_default(client)
+        kill_case_2(client)
     except (
         ConnectionRefusedError,
         ValueError,
@@ -90,6 +96,8 @@ def main():
     already_timed_out = False
 
     # Start loop to connect PyEpiBOX to acquisition devices =========================================
+    if not client.keepAlive:
+        kill_case_2()
     try:
         devices = connect_devices(  # exceptions handled inside
             client, devices, opt, already_timed_out,
@@ -110,6 +118,9 @@ def main():
 
     config_debug.log("Initial setup complete!")
 
+    if not client.keepAlive:
+        kill_case_4(devices)
+
     while client.keepAlive:
 
         try:
@@ -125,7 +136,7 @@ def main():
                 already_notified_pause = True
 
             if not client.pauseAcq:
-                
+
                 if already_notified_pause:
                     message_info = client.publish("rpi", str(["RECONNECTING"]))
                     if message_info.rc == 4:
@@ -133,6 +144,9 @@ def main():
                     already_notified_pause = False
 
                 if not system_started:
+                    if not client.keepAlive:
+                        kill_case_4()
+
                     # If the devices have not yet started acquiring or they are paused, start acquisition
                     a_file, save_fmt, header = open_file(
                         directory,
@@ -146,8 +160,6 @@ def main():
 
                     if client.newAnnot != None:
                         # Write user annotation to file if one is received via MQTT ===============================
-                        # TODO exception handling
-                        config_debug.log(f"annot: {client.newAnnot}")
                         write_annot_file(a_file.name, client.newAnnot)
                         client.newAnnot = None
 
@@ -156,6 +168,14 @@ def main():
                     )
                     system_started = True
                     already_timed_out = False
+
+                if client.newAnnot != None:
+                    # Write user annotation to file if one is received via MQTT ===============================
+                    write_annot_file(a_file.name, client.newAnnot)
+                    client.newAnnot = None
+
+                if not client.keepAlive:
+                    kill_case_5(client, devices, a_file)
 
                 # Read batch of samples from the acquisition devices and store on the active session's file
                 _, t_disp, a_file, sync_param = run_system(
