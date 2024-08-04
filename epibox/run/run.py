@@ -175,7 +175,7 @@ def main():
                     client.newAnnot = None
 
                 if not client.keepAlive:
-                    kill_case_5()
+                    kill_case_5(client, devices, a_file)
 
                 # Read batch of samples from the acquisition devices and store on the active session's file
                 _, t_disp, a_file, sync_param = run_system(
