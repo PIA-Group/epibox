@@ -75,6 +75,9 @@ def main():
 
     except MQTTConnectionError as e:
         kill_case_1()
+    except PermissionError:
+        client.publish("rpi", str(["INSERT STORAGE"]))
+        kill_case_2(client)
     except (
         ConnectionRefusedError,
         ValueError,

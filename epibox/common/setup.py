@@ -138,6 +138,7 @@ def check_storage(client, opt):
             drive_path = opt["initial_dir"]
 
         init_connect_time = time.time()
+        last_warning = time.time()
         config_debug.log(f'Searching for storage module: {opt["initial_dir"]}')
 
         for i in range(1000000000):
@@ -153,9 +154,10 @@ def check_storage(client, opt):
                 break
 
             else:
-                if time.time() - init_connect_time > 3 * i:
+                if time.time() - last_warning > 10:
                     message_info = client.publish(
                         "rpi", str(["INSERT STORAGE"]))
+                    last_warning = time.time()
                     if message_info.rc == 4:
                         raise MQTTConnectionError
 
