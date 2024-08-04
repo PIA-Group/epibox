@@ -89,6 +89,8 @@ def main():
     already_timed_out = False
 
     # Start loop to connect PyEpiBOX to acquisition devices =========================================
+    if not client.keepAlive:
+        kill_case_2()
     try:
         devices = connect_devices(  # exceptions handled inside
             client, devices, opt, already_timed_out,
@@ -108,6 +110,9 @@ def main():
         kill_case_4(devices)
 
     config_debug.log("Initial setup complete!")
+
+    if not client.keepAlive:
+        kill_case_4(devices)
 
     while client.keepAlive:
 
@@ -132,6 +137,9 @@ def main():
                     already_notified_pause = False
 
                 if not system_started:
+                    if not client.keepAlive:
+                        kill_case_4()
+
                     # If the devices have not yet started acquiring or they are paused, start acquisition
                     a_file, save_fmt, header = open_file(
                         directory,
@@ -145,8 +153,6 @@ def main():
 
                     if client.newAnnot != None:
                         # Write user annotation to file if one is received via MQTT ===============================
-                        # TODO exception handling
-                        # config_debug.log(f'annot: {client.newAnnot}')
                         write_annot_file(a_file.name, client.newAnnot)
                         client.newAnnot = None
 
@@ -155,6 +161,14 @@ def main():
                     )
                     system_started = True
                     already_timed_out = False
+
+                if client.newAnnot != None:
+                    # Write user annotation to file if one is received via MQTT ===============================
+                    write_annot_file(a_file.name, client.newAnnot)
+                    client.newAnnot = None
+
+                if not client.keepAlive:
+                    kill_case_5()
 
                 # Read batch of samples from the acquisition devices and store on the active session's file
                 _, t_disp, a_file, sync_param = run_system(

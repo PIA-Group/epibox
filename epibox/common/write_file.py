@@ -25,10 +25,11 @@ def write_acq_file(a_file, t, fmt):
 def write_annot_file(recording_name, annot):
 
     with open(
-        os.path.join(os.path.split(recording_name)[0], "annotations" + ".txt"), "a+"
+        os.path.join(os.path.split(recording_name)[
+                     0], "annotations" + ".txt"), "a+"
     ) as file:
         file.write(
-            f"{os.path.split(recording_name)[1]}    {annot[0]}    {annot[1]}    {datetime.now()}\n"
+            f"{os.path.split(recording_name)[1]}    {annot[0]}    {annot[1]}    {annot[2]}\n"
         )
 
 
@@ -40,7 +41,8 @@ def write_summary_file(recording_name):
     config_debug.log(f"duration: {str(duration)}")
 
     with open(
-        os.path.join(os.path.split(recording_name)[0], "summary" + ".txt"), "a+"
+        os.path.join(os.path.split(recording_name)
+                     [0], "summary" + ".txt"), "a+"
     ) as file:
         file.write(
             "{}  {}\n".format(
