@@ -33,7 +33,6 @@ def setup_client():
     setattr(client, "keepAlive", True)
     setattr(client, "pauseAcq", False)
     setattr(client, "newAnnot", None)
-    setattr(client, "kill", False)
 
     client.username_pw_set(username="preepiseizures",
                            password="preepiseizures")
