@@ -63,10 +63,9 @@ def start_devices(client, devices, fs, mac_channels, header):
         try:
             if header["service"] == "bitalino":
                 device.start(SamplingRate=fs, analogChannels=channels)
-            
+
             elif header["service"] == "scientisst":
                 device.start(sample_rate=fs, channels=channels)
-
 
         except Exception as e:
             config_debug.log(e)
@@ -98,9 +97,10 @@ def connect_devices(
         init_connect_time = time.time()
         config_debug.log(f"Searching for Module... {mac}")
 
-        for i in range(100000):
+        for i in range(10000000):
 
-            if not client.keepAlive: break
+            if not client.keepAlive:
+                break
 
             if (time.time() - init_connect_time) > 120:
                 raise DeviceConnectionTimeout
@@ -119,7 +119,7 @@ def connect_devices(
                         message_info = client.publish("rpi", timeout_json)
                         if message_info.rc == 4:
                             raise MQTTConnectionError
-                        
+
                 else:
                     break
 
